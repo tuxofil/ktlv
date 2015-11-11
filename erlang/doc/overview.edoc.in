@@ -1,0 +1,13 @@
+@author Aleksey Morarash <aleksey.morarash@gmail.com>
+@copyright 2015 Aleksey Morarash <aleksey.morarash@gmail.com>
+@version {{VERSION}}
+@title Welcome to KTLV Erlang Library.
+@doc == Contents ==
+
+<ol>
+ <li>{@section Summary}</li>
+</ol>
+
+== Summary ==
+
+Simple and efficient serializer/deserializer library.

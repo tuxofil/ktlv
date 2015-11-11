@@ -1,0 +1,22 @@
+Source: ktlv
+Section: devel
+Priority: extra
+Maintainer: Aleksey Morarash <aleksey.morarash@gmail.com>
+Build-Depends: debhelper, erlang-dev, erlang-edoc, erlang-eunit,
+ python
+Standards-Version: 3.9.3
+Homepage: https://github.com/tuxofil/ktlv
+Vcs-Browser: https://github.com/tuxofil/ktlv
+Vcs-Git: https://github.com/tuxofil/ktlv.git
+
+Package: erlang-ktlv
+Architecture: all
+Depends: erlang-base
+Description: KTLV codec for Erlang.
+ KTLV codec for Erlang.
+
+Package: python-ktlv
+Architecture: all
+Depends: python
+Description: KTLV codec for Python.
+ KTLV codec for Python.

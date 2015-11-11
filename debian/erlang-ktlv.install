@@ -1,0 +1,6 @@
+erlang/ebin/*.app /usr/lib/erlang/lib/ktlv-0.1.0/ebin
+erlang/ebin/*.beam /usr/lib/erlang/lib/ktlv-0.1.0/ebin
+erlang/include/*.hrl /usr/lib/erlang/lib/ktlv-0.1.0/include
+erlang/doc/*.html /usr/share/doc/erlang-ktlv/html
+erlang/doc/*.css /usr/share/doc/erlang-ktlv/html
+erlang/doc/*.png /usr/share/doc/erlang-ktlv/html

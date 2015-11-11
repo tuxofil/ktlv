@@ -1,0 +1,11 @@
+%%% @author Aleksey Morarash <aleksey.morarash@gmail.com>
+%%% @since 10 Nov 2015
+%%% @copyright 2015, Aleksey Morarash <aleksey.morarash@gmail.com>
+%%% @doc ktlv application resource file
+
+{application, ktlv,
+ [
+  {description,  "Serializer/deserializer library"},
+  {vsn,          "{{VERSION}}"},
+  {modules,      [ktlv]}
+ ]}.
