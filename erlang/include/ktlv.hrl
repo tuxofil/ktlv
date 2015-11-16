@@ -29,4 +29,15 @@
 -define(list_of_uint64, 55).
 -define(list_of_double, 56).
 
+-define(min_uint8, 0).
+-define(min_uint16, 0).
+-define(min_uint24, 0).
+-define(min_uint32, 0).
+-define(min_uint64, 0).
+-define(max_uint8, 16#ff).
+-define(max_uint16, 16#ffff).
+-define(max_uint24, 16#ffffff).
+-define(max_uint32, 16#ffffffff).
+-define(max_uint64, 16#ffffffffffffffff).
+
 -endif.

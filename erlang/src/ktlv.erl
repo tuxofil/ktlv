@@ -108,11 +108,11 @@
         {?list_of_double, [value_double()]}.
 
 -type value_bool() :: 0 | 1.
--type value_uint8() :: 0..16#ff.
--type value_uint16() :: 0..16#ffff.
--type value_uint24() :: 0..16#ffffff.
--type value_uint32() :: 0..16#ffffffff.
--type value_uint64() :: 0..16#ffffffffffffffff.
+-type value_uint8() :: ?min_uint8..?max_uint8.
+-type value_uint16() :: ?min_uint16..?max_uint16.
+-type value_uint24() :: ?min_uint24..?max_uint24.
+-type value_uint32() :: ?min_uint32..?max_uint32.
+-type value_uint64() :: ?min_uint64..?max_uint64.
 -type value_double() :: float().
 -type value_string() :: binary().
 
@@ -279,43 +279,38 @@ bool_test_() ->
     ].
 
 uint8_test_() ->
-    [?_assertMatch(16#ff, encdec(?uint8, -1)),
-     ?_assertMatch(0, encdec(?uint8, 0)),
-     ?_assertMatch(16#ff, encdec(?uint8, 16#ff)),
-     ?_assertMatch(0, encdec(?uint8, 16#ff + 1)),
-     ?_assertMatch(1, encdec(?uint8, 16#ff + 2))
+    [?_assertMatch(?min_uint8, encdec(?uint8, ?min_uint8)),
+     ?_assertMatch(?max_uint8, encdec(?uint8, ?max_uint8)),
+     ?_assertMatch(?max_uint8, encdec(?uint8, ?min_uint8 - 1)),
+     ?_assertMatch(?min_uint8, encdec(?uint8, ?max_uint8 + 1))
     ].
 
 uint16_test_() ->
-    [?_assertMatch(16#ffff, encdec(?uint16, -1)),
-     ?_assertMatch(0, encdec(?uint16, 0)),
-     ?_assertMatch(16#ffff, encdec(?uint16, 16#ffff)),
-     ?_assertMatch(0, encdec(?uint16, 16#ffff + 1)),
-     ?_assertMatch(1, encdec(?uint16, 16#ffff + 2))
+    [?_assertMatch(?min_uint16, encdec(?uint16, ?min_uint16)),
+     ?_assertMatch(?max_uint16, encdec(?uint16, ?max_uint16)),
+     ?_assertMatch(?max_uint16, encdec(?uint16, ?min_uint16 - 1)),
+     ?_assertMatch(?min_uint16, encdec(?uint16, ?max_uint16 + 1))
     ].
 
 uint24_test_() ->
-    [?_assertMatch(16#ffffff, encdec(?uint24, -1)),
-     ?_assertMatch(0, encdec(?uint24, 0)),
-     ?_assertMatch(16#ffffff, encdec(?uint24, 16#ffffff)),
-     ?_assertMatch(0, encdec(?uint24, 16#ffffff + 1)),
-     ?_assertMatch(1, encdec(?uint24, 16#ffffff + 2))
+    [?_assertMatch(?min_uint24, encdec(?uint24, ?min_uint24)),
+     ?_assertMatch(?max_uint24, encdec(?uint24, ?max_uint24)),
+     ?_assertMatch(?max_uint24, encdec(?uint24, ?min_uint24 - 1)),
+     ?_assertMatch(?min_uint24, encdec(?uint24, ?max_uint24 + 1))
     ].
 
 uint32_test_() ->
-    [?_assertMatch(16#ffffffff, encdec(?uint32, -1)),
-     ?_assertMatch(0, encdec(?uint32, 0)),
-     ?_assertMatch(16#ffffffff, encdec(?uint32, 16#ffffffff)),
-     ?_assertMatch(0, encdec(?uint32, 16#ffffffff + 1)),
-     ?_assertMatch(1, encdec(?uint32, 16#ffffffff + 2))
+    [?_assertMatch(?min_uint32, encdec(?uint32, ?min_uint32)),
+     ?_assertMatch(?max_uint32, encdec(?uint32, ?max_uint32)),
+     ?_assertMatch(?max_uint32, encdec(?uint32, ?min_uint32 - 1)),
+     ?_assertMatch(?min_uint32, encdec(?uint32, ?max_uint32 + 1))
     ].
 
 uint64_test_() ->
-    [?_assertMatch(16#ffffffffffffffff, encdec(?uint64, -1)),
-     ?_assertMatch(0, encdec(?uint64, 0)),
-     ?_assertMatch(16#ffffffffffffffff, encdec(?uint64, 16#ffffffffffffffff)),
-     ?_assertMatch(0, encdec(?uint64, 16#ffffffffffffffff + 1)),
-     ?_assertMatch(1, encdec(?uint64, 16#ffffffffffffffff + 2))
+    [?_assertMatch(?min_uint64, encdec(?uint64, ?min_uint64)),
+     ?_assertMatch(?max_uint64, encdec(?uint64, ?max_uint64)),
+     ?_assertMatch(?max_uint64, encdec(?uint64, ?min_uint64 - 1)),
+     ?_assertMatch(?min_uint64, encdec(?uint64, ?max_uint64 + 1))
     ].
 
 double_test_() ->
