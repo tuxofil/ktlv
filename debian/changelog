@@ -1,3 +1,10 @@
+ktlv (0.2.0) unstable; urgency=low
+
+  * add new types: int{8,16,24,32,64}, list_of_int{8,16,24,32,64}
+  * dispose of magic numbers in unit tests
+
+ -- Aleksey Morarash <aleksey.morarash@gmail.com>  Mon, 16 Nov 2015 17:06:08 +0200
+
 ktlv (0.1.0) unstable; urgency=low
 
   * Initial release.
