@@ -20,6 +20,11 @@
 -define(double, 6).
 -define(string, 7).
 -define(bitmap, 8).
+-define(int8, 9).
+-define(int16, 10).
+-define(int24, 11).
+-define(int32, 12).
+-define(int64, 13).
 
 -define(list_of_string, 50).
 -define(list_of_uint8, 51).
@@ -28,7 +33,22 @@
 -define(list_of_uint32, 54).
 -define(list_of_uint64, 55).
 -define(list_of_double, 56).
+-define(list_of_int8, 57).
+-define(list_of_int16, 58).
+-define(list_of_int24, 59).
+-define(list_of_int32, 60).
+-define(list_of_int64, 61).
 
+-define(min_int8, -16#80).
+-define(min_int16, -16#8000).
+-define(min_int24, -16#800000).
+-define(min_int32, -16#80000000).
+-define(min_int64, -16#8000000000000000).
+-define(max_int8, 16#7f).
+-define(max_int16, 16#7fff).
+-define(max_int24, 16#7fffff).
+-define(max_int32, 16#7fffffff).
+-define(max_int64, 16#7fffffffffffffff).
 -define(min_uint8, 0).
 -define(min_uint16, 0).
 -define(min_uint24, 0).

@@ -19,7 +19,17 @@ LIST_MODEL = [(1, ktlv.BOOL, True),
               (13, ktlv.LIST_OF_UINT24, [7, 8, 9]),
               (14, ktlv.LIST_OF_UINT32, [10, 11, 12]),
               (15, ktlv.LIST_OF_UINT64, [13, 14, 15]),
-              (16, ktlv.LIST_OF_DOUBLE, [1.1, 2.2, 3.3])]
+              (16, ktlv.LIST_OF_DOUBLE, [1.1, 2.2, 3.3]),
+              (17, ktlv.INT8, -2),
+              (18, ktlv.INT16, -3),
+              (19, ktlv.INT24, -4),
+              (20, ktlv.INT32, -5),
+              (21, ktlv.INT64, -6),
+              (22, ktlv.LIST_OF_INT8, [1, -2, 3]),
+              (23, ktlv.LIST_OF_INT16, [4, -5, 6]),
+              (24, ktlv.LIST_OF_INT24, [7, -8, 9]),
+              (25, ktlv.LIST_OF_INT32, [10, -11, 12]),
+              (26, ktlv.LIST_OF_INT64, [13, -14, 15])]
 DICT_MODEL = {k: (t, v) for k, t, v in LIST_MODEL}
 
 

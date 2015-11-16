@@ -16,6 +16,11 @@ UINT64 = 5
 DOUBLE = 6
 STRING = 7
 BITMAP = 8
+INT8 = 9
+INT16 = 10
+INT24 = 11
+INT32 = 12
+INT64 = 13
 LIST_OF_STRING = 50
 LIST_OF_UINT8 = 51
 LIST_OF_UINT16 = 52
@@ -23,6 +28,11 @@ LIST_OF_UINT24 = 53
 LIST_OF_UINT32 = 54
 LIST_OF_UINT64 = 55
 LIST_OF_DOUBLE = 56
+LIST_OF_INT8 = 57
+LIST_OF_INT16 = 58
+LIST_OF_INT24 = 59
+LIST_OF_INT32 = 60
+LIST_OF_INT64 = 61
 
 
 def enc(elements):
@@ -103,6 +113,17 @@ def dec_elem(dtype, binary):
         return struct.unpack('>I', binary)[0]
     elif dtype == UINT64:
         return struct.unpack('>Q', binary)[0]
+    elif dtype == INT8:
+        return struct.unpack('>b', binary)[0]
+    elif dtype == INT16:
+        return struct.unpack('>h', binary)[0]
+    elif dtype == INT24:
+        (major, minor) = struct.unpack('>hB', binary)
+        return major * 256 + minor
+    elif dtype == INT32:
+        return struct.unpack('>i', binary)[0]
+    elif dtype == INT64:
+        return struct.unpack('>q', binary)[0]
     elif dtype == DOUBLE:
         return struct.unpack('>d', binary)[0]
     elif dtype == STRING:
@@ -154,5 +175,20 @@ def dec_elem(dtype, binary):
         return list(struct.unpack('>' + 'I' * (len(binary) / 4), binary))
     elif dtype == LIST_OF_UINT64:
         return list(struct.unpack('>' + 'Q' * (len(binary) / 8), binary))
+    elif dtype == LIST_OF_INT8:
+        return list(struct.unpack('>' + 'b' * len(binary), binary))
+    elif dtype == LIST_OF_INT16:
+        return list(struct.unpack('>' + 'h' * (len(binary) / 2), binary))
+    elif dtype == LIST_OF_INT24:
+        unpacked = struct.unpack('>' + 'hB' * (len(binary) / 3), binary)
+        result = []
+        while unpacked:
+            result.append(unpacked[0] * 256 + unpacked[1])
+            unpacked = unpacked[2:]
+        return result
+    elif dtype == LIST_OF_INT32:
+        return list(struct.unpack('>' + 'i' * (len(binary) / 4), binary))
+    elif dtype == LIST_OF_INT64:
+        return list(struct.unpack('>' + 'q' * (len(binary) / 8), binary))
     elif dtype == LIST_OF_DOUBLE:
         return list(struct.unpack('>' + 'd' * (len(binary) / 8), binary))
