@@ -108,7 +108,7 @@ def dec_elem(dtype, binary):
         return struct.unpack('>H', binary)[0]
     elif dtype == UINT24:
         (major, minor) = struct.unpack('>BH', binary)
-        return major * 256 + minor
+        return (major << 16) + minor
     elif dtype == UINT32:
         return struct.unpack('>I', binary)[0]
     elif dtype == UINT64:
@@ -119,7 +119,7 @@ def dec_elem(dtype, binary):
         return struct.unpack('>h', binary)[0]
     elif dtype == INT24:
         (major, minor) = struct.unpack('>hB', binary)
-        return major * 256 + minor
+        return (major << 8) + minor
     elif dtype == INT32:
         return struct.unpack('>i', binary)[0]
     elif dtype == INT64:
@@ -168,7 +168,7 @@ def dec_elem(dtype, binary):
         unpacked = struct.unpack('>' + 'BH' * (len(binary) / 3), binary)
         result = []
         while unpacked:
-            result.append(unpacked[0] * 256 + unpacked[1])
+            result.append((unpacked[0] << 16) + unpacked[1])
             unpacked = unpacked[2:]
         return result
     elif dtype == LIST_OF_UINT32:
@@ -183,7 +183,7 @@ def dec_elem(dtype, binary):
         unpacked = struct.unpack('>' + 'hB' * (len(binary) / 3), binary)
         result = []
         while unpacked:
-            result.append(unpacked[0] * 256 + unpacked[1])
+            result.append((unpacked[0] << 8) + unpacked[1])
             unpacked = unpacked[2:]
         return result
     elif dtype == LIST_OF_INT32:
