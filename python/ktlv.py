@@ -35,6 +35,27 @@ LIST_OF_INT32 = 60
 LIST_OF_INT64 = 61
 
 
+MIN_INT8 = -0x80
+MIN_INT16 = -0x8000
+MIN_INT24 = -0x800000
+MIN_INT32 = -0x80000000
+MIN_INT64 = -0x8000000000000000
+MAX_INT8 = 0x7f
+MAX_INT16 = 0x7fff
+MAX_INT24 = 0x7fffff
+MAX_INT32 = 0x7fffffff
+MAX_INT64 = 0x7fffffffffffffff
+MIN_UINT8 = 0
+MIN_UINT16 = 0
+MIN_UINT24 = 0
+MIN_UINT32 = 0
+MIN_UINT64 = 0
+MAX_UINT8 = 0xff
+MAX_UINT16 = 0xffff
+MAX_UINT24 = 0xffffff
+MAX_UINT32 = 0xffffffff
+MAX_UINT64 = 0xffffffffffffffff
+
 def enc(elements):
     """
     Encode (key,type,value) list to a byte array.
