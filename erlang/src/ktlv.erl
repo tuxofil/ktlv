@@ -455,7 +455,11 @@ list_of_uint8_test_() ->
      ?_assertMatch([0], encdec(?list_of_uint8, [0])),
      ?_assertMatch([1], encdec(?list_of_uint8, [1])),
      ?_assertMatch([1, 1], encdec(?list_of_uint8, [1, 1])),
-     ?_assertMatch([1, 2, 3], encdec(?list_of_uint8, [1, 2, 3]))
+     ?_assertMatch([1, 2, 3], encdec(?list_of_uint8, [1, 2, 3])),
+     ?_assertMatch(
+        [?min_uint8, ?max_uint8, ?max_uint8, ?min_uint8],
+        encdec(?list_of_uint8,
+               [?min_uint8, ?max_uint8, ?min_uint8 - 1, ?max_uint8 + 1]))
     ].
 
 list_of_uint16_test_() ->
@@ -463,7 +467,11 @@ list_of_uint16_test_() ->
      ?_assertMatch([0], encdec(?list_of_uint16, [0])),
      ?_assertMatch([1], encdec(?list_of_uint16, [1])),
      ?_assertMatch([1, 1], encdec(?list_of_uint16, [1, 1])),
-     ?_assertMatch([1, 2, 3], encdec(?list_of_uint16, [1, 2, 3]))
+     ?_assertMatch([1, 2, 3], encdec(?list_of_uint16, [1, 2, 3])),
+     ?_assertMatch(
+        [?min_uint16, ?max_uint16, ?max_uint16, ?min_uint16],
+        encdec(?list_of_uint16,
+               [?min_uint16, ?max_uint16, ?min_uint16 - 1, ?max_uint16 + 1]))
     ].
 
 list_of_uint24_test_() ->
@@ -471,7 +479,11 @@ list_of_uint24_test_() ->
      ?_assertMatch([0], encdec(?list_of_uint24, [0])),
      ?_assertMatch([1], encdec(?list_of_uint24, [1])),
      ?_assertMatch([1, 1], encdec(?list_of_uint24, [1, 1])),
-     ?_assertMatch([1, 2, 3], encdec(?list_of_uint24, [1, 2, 3]))
+     ?_assertMatch([1, 2, 3], encdec(?list_of_uint24, [1, 2, 3])),
+     ?_assertMatch(
+        [?min_uint24, ?max_uint24, ?max_uint24, ?min_uint24],
+        encdec(?list_of_uint24,
+               [?min_uint24, ?max_uint24, ?min_uint24 - 1, ?max_uint24 + 1]))
     ].
 
 list_of_uint32_test_() ->
@@ -479,7 +491,11 @@ list_of_uint32_test_() ->
      ?_assertMatch([0], encdec(?list_of_uint32, [0])),
      ?_assertMatch([1], encdec(?list_of_uint32, [1])),
      ?_assertMatch([1, 1], encdec(?list_of_uint32, [1, 1])),
-     ?_assertMatch([1, 2, 3], encdec(?list_of_uint32, [1, 2, 3]))
+     ?_assertMatch([1, 2, 3], encdec(?list_of_uint32, [1, 2, 3])),
+     ?_assertMatch(
+        [?min_uint32, ?max_uint32, ?max_uint32, ?min_uint32],
+        encdec(?list_of_uint32,
+               [?min_uint32, ?max_uint32, ?min_uint32 - 1, ?max_uint32 + 1]))
     ].
 
 list_of_uint64_test_() ->
@@ -487,7 +503,11 @@ list_of_uint64_test_() ->
      ?_assertMatch([0], encdec(?list_of_uint64, [0])),
      ?_assertMatch([1], encdec(?list_of_uint64, [1])),
      ?_assertMatch([1, 1], encdec(?list_of_uint64, [1, 1])),
-     ?_assertMatch([1, 2, 3], encdec(?list_of_uint64, [1, 2, 3]))
+     ?_assertMatch([1, 2, 3], encdec(?list_of_uint64, [1, 2, 3])),
+     ?_assertMatch(
+        [?min_uint64, ?max_uint64, ?max_uint64, ?min_uint64],
+        encdec(?list_of_uint64,
+               [?min_uint64, ?max_uint64, ?min_uint64 - 1, ?max_uint64 + 1]))
     ].
 
 list_of_int8_test_() ->
@@ -495,7 +515,11 @@ list_of_int8_test_() ->
      ?_assertMatch([0], encdec(?list_of_int8, [0])),
      ?_assertMatch([1], encdec(?list_of_int8, [1])),
      ?_assertMatch([1, 1], encdec(?list_of_int8, [1, 1])),
-     ?_assertMatch([1, -2, 3], encdec(?list_of_int8, [1, -2, 3]))
+     ?_assertMatch([1, -2, 3], encdec(?list_of_int8, [1, -2, 3])),
+     ?_assertMatch(
+        [0, ?min_int8, ?max_int8, ?max_int8, ?min_int8],
+        encdec(?list_of_int8,
+               [0, ?min_int8, ?max_int8, ?min_int8 - 1, ?max_int8 + 1]))
     ].
 
 list_of_int16_test_() ->
@@ -503,7 +527,11 @@ list_of_int16_test_() ->
      ?_assertMatch([0], encdec(?list_of_int16, [0])),
      ?_assertMatch([1], encdec(?list_of_int16, [1])),
      ?_assertMatch([1, 1], encdec(?list_of_int16, [1, 1])),
-     ?_assertMatch([1, -2, 3], encdec(?list_of_int16, [1, -2, 3]))
+     ?_assertMatch([1, -2, 3], encdec(?list_of_int16, [1, -2, 3])),
+     ?_assertMatch(
+        [0, ?min_int16, ?max_int16, ?max_int16, ?min_int16],
+        encdec(?list_of_int16,
+               [0, ?min_int16, ?max_int16, ?min_int16 - 1, ?max_int16 + 1]))
     ].
 
 list_of_int24_test_() ->
@@ -511,7 +539,11 @@ list_of_int24_test_() ->
      ?_assertMatch([0], encdec(?list_of_int24, [0])),
      ?_assertMatch([1], encdec(?list_of_int24, [1])),
      ?_assertMatch([1, 1], encdec(?list_of_int24, [1, 1])),
-     ?_assertMatch([1, -2, 3], encdec(?list_of_int24, [1, -2, 3]))
+     ?_assertMatch([1, -2, 3], encdec(?list_of_int24, [1, -2, 3])),
+     ?_assertMatch(
+        [0, ?min_int24, ?max_int24, ?max_int24, ?min_int24],
+        encdec(?list_of_int24,
+               [0, ?min_int24, ?max_int24, ?min_int24 - 1, ?max_int24 + 1]))
     ].
 
 list_of_int32_test_() ->
@@ -519,7 +551,11 @@ list_of_int32_test_() ->
      ?_assertMatch([0], encdec(?list_of_int32, [0])),
      ?_assertMatch([1], encdec(?list_of_int32, [1])),
      ?_assertMatch([1, 1], encdec(?list_of_int32, [1, 1])),
-     ?_assertMatch([1, -2, 3], encdec(?list_of_int32, [1, -2, 3]))
+     ?_assertMatch([1, -2, 3], encdec(?list_of_int32, [1, -2, 3])),
+     ?_assertMatch(
+        [0, ?min_int32, ?max_int32, ?max_int32, ?min_int32],
+        encdec(?list_of_int32,
+               [0, ?min_int32, ?max_int32, ?min_int32 - 1, ?max_int32 + 1]))
     ].
 
 list_of_int64_test_() ->
@@ -527,7 +563,11 @@ list_of_int64_test_() ->
      ?_assertMatch([0], encdec(?list_of_int64, [0])),
      ?_assertMatch([1], encdec(?list_of_int64, [1])),
      ?_assertMatch([1, 1], encdec(?list_of_int64, [1, 1])),
-     ?_assertMatch([1, -2, 3], encdec(?list_of_int64, [1, -2, 3]))
+     ?_assertMatch([1, -2, 3], encdec(?list_of_int64, [1, -2, 3])),
+     ?_assertMatch(
+        [0, ?min_int64, ?max_int64, ?max_int64, ?min_int64],
+        encdec(?list_of_int64,
+               [0, ?min_int64, ?max_int64, ?min_int64 - 1, ?max_int64 + 1]))
     ].
 
 main_test_() ->
