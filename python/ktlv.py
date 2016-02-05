@@ -65,7 +65,11 @@ def enc(elements):
 
     :rtype: string
     """
-    raise NotImplemented
+    encoded = ''
+    for key, dtype, value in elements:
+        binary = enc_elem(dtype, value)
+        encoded += struct.pack('>HBH', key, dtype, len(binary)) + binary
+    return encoded
 
 
 def dec(binary):
@@ -213,3 +217,74 @@ def dec_elem(dtype, binary):
         return list(struct.unpack('>' + 'q' * (len(binary) / 8), binary))
     elif dtype == LIST_OF_DOUBLE:
         return list(struct.unpack('>' + 'd' * (len(binary) / 8), binary))
+
+
+def enc_elem(dtype, val):
+    """
+    Encode element.
+
+    :param dtype: data type identifier
+    :type dtype: integer
+
+    :param val: element value
+    :type val: any
+
+    :rtype: binary
+    """
+    if dtype == BOOL:
+        return struct.pack('>?', val)
+    elif dtype == UINT8:
+        return struct.pack('>B', val)
+    elif dtype == UINT16:
+        return struct.pack('>H', val)
+    elif dtype == UINT24:
+        return struct.pack('>HB', *divmod(val, 0x100))
+    elif dtype == UINT32:
+        return struct.pack('>I', val)
+    elif dtype == UINT64:
+        return struct.pack('>Q', val)
+    elif dtype == INT8:
+        return struct.pack('>b', val)
+    elif dtype == INT16:
+        return struct.pack('>h', val)
+    elif dtype == INT24:
+        return struct.pack('>hB', *divmod(val, 0x100))
+    elif dtype == INT32:
+        return struct.pack('>i', val)
+    elif dtype == INT64:
+        return struct.pack('>q', val)
+    elif dtype == DOUBLE:
+        return struct.pack('>d', val)
+    elif dtype == STRING:
+        return val
+    elif dtype == LIST_OF_STRING:
+        return ''.join([struct.pack('>H', len(e)) + e for e in val])
+    elif dtype == LIST_OF_UINT8:
+        return struct.pack('>' + 'B' * len(val), *val)
+    elif dtype == LIST_OF_UINT16:
+        return struct.pack('>' + 'H' * len(val), *val)
+    elif dtype == LIST_OF_UINT24:
+        return ''.join([struct.pack('>HB', *divmod(e, 0x100)) for e in val])
+    elif dtype == LIST_OF_UINT32:
+        return struct.pack('>' + 'I' * len(val), *val)
+    elif dtype == LIST_OF_UINT64:
+        return struct.pack('>' + 'Q' * len(val), *val)
+    elif dtype == LIST_OF_INT8:
+        return struct.pack('>' + 'b' * len(val), *val)
+    elif dtype == LIST_OF_INT16:
+        return struct.pack('>' + 'h' * len(val), *val)
+    elif dtype == LIST_OF_INT24:
+        return ''.join([struct.pack('>hB', *divmod(e, 0x100)) for e in val])
+    elif dtype == LIST_OF_INT32:
+        return struct.pack('>' + 'i' * len(val), *val)
+    elif dtype == LIST_OF_INT64:
+        return struct.pack('>' + 'q' * len(val), *val)
+    elif dtype == LIST_OF_DOUBLE:
+        return struct.pack('>' + 'd' * len(val), *val)
+    elif dtype == BITMAP:
+        unused = 8 - len(val) % 8
+        val = [0] * unused + val
+        fun = lambda a, n: (a << 1) + n
+        ints = [reduce(fun, val[i:i + 8], 0)
+                for i in range(0, len(val), 8)]
+        return struct.pack('>B' + 'B' * len(ints), unused, *ints)

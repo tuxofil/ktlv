@@ -1,4 +1,4 @@
-TESTS = erlang-python
+TESTS = erlang-python python
 
 .PHONY: all clean $(TESTS)
 
