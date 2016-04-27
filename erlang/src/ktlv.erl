@@ -34,7 +34,7 @@
 -module(ktlv).
 
 %% API exports
--export([enc/1, dec/1, decd/1]).
+-export([enc/1, encd/1, dec/1, decd/1]).
 
 -include("ktlv.hrl").
 
@@ -160,6 +160,11 @@
 enc(List) ->
     << <<Key:16/unsigned-big, Type:8/unsigned-big, (enc(Type, Value))/binary>>
        || {Key, Type, Value} <- List>>.
+
+%% @doc Encode dict:dict(Key,{Type,Value}) object to binary.
+-spec encd(objectd()) -> binary().
+encd(Dictionary) ->
+    enc([{K, T, V} || {K, {T, V}} <- dict:to_list(Dictionary)]).
 
 %% @doc Decode binary to {Key,Type,Value} list.
 -spec dec(binary()) -> [element()].
