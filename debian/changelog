@@ -1,3 +1,9 @@
+ktlv (0.4.0) unstable; urgency=low
+
+  * erlang: add encd/1 API call
+
+ -- Aleksey Morarash <aleksey.morarash@gmail.com>  Wed, 27 Apr 2016 14:51:35 +0300
+
 ktlv (0.3.0) unstable; urgency=low
 
   * python: implement encoder
