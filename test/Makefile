@@ -1,4 +1,4 @@
-TESTS = erlang-python python
+TESTS = erlang-golang erlang-python python
 
 .PHONY: all clean $(TESTS)
 
