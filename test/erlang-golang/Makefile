@@ -1,7 +1,6 @@
 .PHONY: all clean
 
 all: clean
-	ln -sf ../../erlang/include/ktlv.hrl .
 	../erlang-python/erlang-write.escript
 	GOPATH=`pwd`/../../golang go run golang-read.go
 
