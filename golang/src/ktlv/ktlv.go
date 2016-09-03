@@ -58,20 +58,20 @@ const (
 	Max_Uint64 = uint64(0xffffffffffffffff)
 )
 
-type key uint16
+type Key uint16
 
-type ftype uint8
+type FType uint8
 
 type Elem struct {
-	Key   key
-	FType ftype
+	Key
+	FType
 	Value interface{}
 }
 
-type Decoded []*Elem
+type Data []*Elem
 
 // Encode input data to byte buffer.
-func Enc(data Decoded) []byte {
+func Enc(data Data) []byte {
 	parts := make([][]byte, len(data))
 	for k, v := range data {
 		body := encode_val(v.FType, v.Value)
@@ -85,12 +85,12 @@ func Enc(data Decoded) []byte {
 }
 
 // Decode data from byte buffer.
-func Dec(bytes []byte) Decoded {
-	res := make(Decoded, 0, 100)
+func Dec(bytes []byte) Data {
+	res := make(Data, 0, 100)
 	tail := bytes
 	for 5 <= len(tail) {
-		key := key(binary.BigEndian.Uint16(tail[0:2]))
-		ftype := ftype(tail[2])
+		key := Key(binary.BigEndian.Uint16(tail[0:2]))
+		ftype := FType(tail[2])
 		body_len := binary.BigEndian.Uint16(tail[3:5])
 		value := decode_val(ftype, tail[5:5+body_len])
 		res = append(res, &Elem{key, ftype, value})
@@ -256,7 +256,7 @@ func (e1 *Elem) Equals(e2 *Elem) bool {
 }
 
 // Encode element value to bytes.
-func encode_val(t ftype, v0 interface{}) (r []byte) {
+func encode_val(t FType, v0 interface{}) (r []byte) {
 	switch t {
 	case Bool:
 		if v0.(bool) {
@@ -397,7 +397,7 @@ func encode_val(t ftype, v0 interface{}) (r []byte) {
 }
 
 // Decode element value from byte slice.
-func decode_val(t ftype, b []byte) interface{} {
+func decode_val(t FType, b []byte) interface{} {
 	var value interface{} = nil
 	switch t {
 	case Bool:

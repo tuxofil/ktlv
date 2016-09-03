@@ -25,7 +25,7 @@ func main() {
 	}
 	data := ktlv.Dec(b)
 
-	expected := ktlv.Decoded{
+	expected := ktlv.Data{
 		&ktlv.Elem{1, ktlv.Bool, true},
 		&ktlv.Elem{2, ktlv.Uint8, uint8(2)},
 		&ktlv.Elem{3, ktlv.Uint16, uint16(3)},
