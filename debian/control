@@ -3,7 +3,7 @@ Section: devel
 Priority: extra
 Maintainer: Aleksey Morarash <aleksey.morarash@gmail.com>
 Build-Depends: debhelper, erlang-dev, erlang-edoc, erlang-eunit,
- python
+ python, golang
 Standards-Version: 3.9.3
 Homepage: https://github.com/tuxofil/ktlv
 Vcs-Browser: https://github.com/tuxofil/ktlv
@@ -20,3 +20,8 @@ Architecture: all
 Depends: python
 Description: KTLV codec for Python.
  KTLV codec for Python.
+
+Package: golang-ktlv
+Architecture: all
+Description: KTLV codec for Go.
+ KTLV codec for Go.
