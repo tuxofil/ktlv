@@ -3,6 +3,7 @@ package ktlv
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"log"
 	"math"
 )
@@ -70,33 +71,70 @@ type Elem struct {
 
 type Data []*Elem
 
+type DataDict map[Key]*Elem
+
 // Encode input data to byte buffer.
 func Enc(data Data) []byte {
 	parts := make([][]byte, len(data))
 	for k, v := range data {
-		body := encode_val(v.FType, v.Value)
-		parts[k] = make([]byte, len(body)+5)
-		copy(parts[k][5:], body)
-		binary.BigEndian.PutUint16(parts[k][0:2], uint16(v.Key))
-		parts[k][2] = uint8(v.FType)
-		binary.BigEndian.PutUint16(parts[k][3:5], uint16(len(body)))
+		parts[k] = v.encode()
+	}
+	return bytes.Join(parts, []byte{})
+}
+
+// Encode dictionary with input data to byte buffer.
+func Encd(data DataDict) []byte {
+	parts := make([][]byte, len(data))
+	i := 0
+	for _, v := range data {
+		parts[i] = v.encode()
+		i++
 	}
 	return bytes.Join(parts, []byte{})
 }
 
 // Decode data from byte buffer.
 func Dec(bytes []byte) Data {
+	var elem *Elem
+	var err error
 	res := make(Data, 0, 100)
-	tail := bytes
-	for 5 <= len(tail) {
-		key := Key(binary.BigEndian.Uint16(tail[0:2]))
-		ftype := FType(tail[2])
-		body_len := binary.BigEndian.Uint16(tail[3:5])
-		value := decode_val(ftype, tail[5:5+body_len])
-		res = append(res, &Elem{key, ftype, value})
-		tail = tail[5+body_len:]
+	for {
+		elem, bytes, err = scan(bytes)
+		if err != nil {
+			break
+		}
+		res = append(res, elem)
 	}
 	return res
+}
+
+// Decode data from byte buffer to dictionary.
+func Decd(bytes []byte) DataDict {
+	var elem *Elem
+	var err error
+	var res = make(DataDict)
+	for {
+		elem, bytes, err = scan(bytes)
+		if err != nil {
+			break
+		}
+		res[elem.Key] = elem
+	}
+	return res
+}
+
+// Convert list of elements to dict of elements.
+func (d *Data) Dict() (dict DataDict) {
+	dict = make(DataDict)
+	for _, e := range *d {
+		dict[e.Key] = e
+	}
+	return dict
+}
+
+// Add new element to data dictionary.
+func (d *DataDict) Add(key Key, ftype FType, value interface{}) {
+	(*d)[key] = &Elem{key, ftype, value}
 }
 
 // Check if elements are equal or not.
@@ -253,6 +291,32 @@ func (e1 *Elem) Equals(e2 *Elem) bool {
 		return e1.Value == e2.Value
 	}
 	return true
+}
+
+// Encode data element to bytes.
+func (e *Elem) encode() []byte {
+	body := encode_val(e.FType, e.Value)
+	res := make([]byte, len(body)+5)
+	copy(res[5:], body)
+	binary.BigEndian.PutUint16(res[0:2], uint16(e.Key))
+	res[2] = uint8(e.FType)
+	binary.BigEndian.PutUint16(res[3:5], uint16(len(body)))
+	return res
+}
+
+// Decode next element from byte slice.
+func scan(bytes []byte) (elem *Elem, tail []byte, err error) {
+	if len(bytes) == 0 {
+		return nil, bytes, errors.New("EOF")
+	}
+	if len(bytes) < 5 {
+		return nil, bytes, errors.New("incomplete element header")
+	}
+	key := Key(binary.BigEndian.Uint16(bytes[0:2]))
+	ftype := FType(bytes[2])
+	body_len := binary.BigEndian.Uint16(bytes[3:5])
+	value := decode_val(ftype, bytes[5:5+body_len])
+	return &Elem{key, ftype, value}, bytes[5+body_len:], nil
 }
 
 // Encode element value to bytes.

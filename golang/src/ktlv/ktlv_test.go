@@ -19,6 +19,20 @@ func encdec(t *testing.T, data0 Data) {
 			t.Fatalf("elems differ: %v and %v", e0, e1)
 		}
 	}
+	// test dictionaries
+	ddata0 := data0.Dict()
+	bytes = Encd(ddata0)
+	ddata1 := Decd(bytes)
+	if len(ddata0) != len(ddata1) {
+		t.Fatalf(
+			"encdec: dicts: origin data len is %v but encoded-decoded data len is %v",
+			len(ddata0), len(ddata1))
+	}
+	for k, v := range ddata0 {
+		if !v.Equals(ddata1[k]) {
+			t.Fatalf("dict elems differ: %v and %v", v, ddata1[k])
+		}
+	}
 }
 
 func TestBool(t *testing.T) {
