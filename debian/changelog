@@ -1,3 +1,17 @@
+ktlv (0.5.0) unstable; urgency=low
+
+  * golang: extend API for with maps
+  * golang makefile: add fmt target
+  * golang makefile: remove unused code
+  * extend gitignore file
+  * golang: refactor type names
+  * debianize Golang code
+  * tests minor fix
+  * implement codec for Go
+  * license: year fix
+
+ -- Aleksey Morarash <aleksey.morarash@gmail.com>  Mon, 12 Sep 2016 07:10:21 +0300
+
 ktlv (0.4.0) unstable; urgency=low
 
   * erlang: add encd/1 API call
