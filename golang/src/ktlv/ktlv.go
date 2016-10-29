@@ -123,6 +123,36 @@ func Decd(bytes []byte) DataDict {
 	return res
 }
 
+// String field getter.
+func (d *DataDict) GetString(key Key, def string) string {
+	if elem, ok := (*d)[key]; ok {
+		if elem.FType == String {
+			return elem.Value.(string)
+		}
+	}
+	return def
+}
+
+// uint64 field getter.
+func (d *DataDict) GetUint64(key Key, def uint64) uint64 {
+	if elem, ok := (*d)[key]; ok {
+		if elem.FType == Uint64 {
+			return elem.Value.(uint64)
+		}
+	}
+	return def
+}
+
+// double field getter.
+func (d *DataDict) GetDouble(key Key, def float64) float64 {
+	if elem, ok := (*d)[key]; ok {
+		if elem.FType == Double {
+			return elem.Value.(float64)
+		}
+	}
+	return def
+}
+
 // Convert list of elements to dict of elements.
 func (d *Data) Dict() (dict DataDict) {
 	dict = make(DataDict)
