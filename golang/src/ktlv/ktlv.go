@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"log"
 	"math"
 )
@@ -74,53 +75,101 @@ type Data []*Elem
 type DataDict map[Key]*Elem
 
 // Encode input data to byte buffer.
-func Enc(data Data) []byte {
-	parts := make([][]byte, len(data))
-	for k, v := range data {
-		parts[k] = v.encode()
+func (d Data) Encode() ([]byte, error) {
+	buffer := bytes.NewBuffer([]byte{})
+	for _, elem := range d {
+		encoded, err := elem.Encode()
+		if err != nil {
+			return nil, err
+		}
+		if _, err := buffer.Write(encoded); err != nil {
+			return nil, err
+		}
 	}
-	return bytes.Join(parts, []byte{})
+	return buffer.Bytes(), nil
 }
 
 // Encode dictionary with input data to byte buffer.
-func Encd(data DataDict) []byte {
-	parts := make([][]byte, len(data))
-	i := 0
-	for _, v := range data {
-		parts[i] = v.encode()
-		i++
+func (d DataDict) Encode() ([]byte, error) {
+	buffer := bytes.NewBuffer([]byte{})
+	for _, elem := range d {
+		encoded, err := elem.Encode()
+		if err != nil {
+			return nil, err
+		}
+		if _, err := buffer.Write(encoded); err != nil {
+			return nil, err
+		}
 	}
-	return bytes.Join(parts, []byte{})
+	return buffer.Bytes(), nil
+}
+
+// Encode input data to byte buffer.
+// Deprecated API.
+func Enc(data Data) []byte {
+	bytes, err := data.Encode()
+	if err != nil {
+		log.Fatalf("deprecated API: %s", err)
+	}
+	return bytes
+}
+
+// Encode dictionary with input data to byte buffer.
+// Deprecated API.
+func Encd(data DataDict) []byte {
+	bytes, err := data.Encode()
+	if err != nil {
+		log.Fatalf("deprecated API: %s", err)
+	}
+	return bytes
 }
 
 // Decode data from byte buffer.
-func Dec(bytes []byte) Data {
-	var elem *Elem
-	var err error
-	res := make(Data, 0, 100)
-	for {
-		elem, bytes, err = scan(bytes)
+func Decode(bytes []byte) (Data, error) {
+	res := make(Data, 0)
+	for 0 < len(bytes) {
+		elem, tail, err := scan(bytes)
 		if err != nil {
-			break
+			return nil, err
 		}
 		res = append(res, elem)
+		bytes = tail
 	}
-	return res
+	return res, nil
 }
 
 // Decode data from byte buffer to dictionary.
-func Decd(bytes []byte) DataDict {
-	var elem *Elem
-	var err error
-	var res = make(DataDict)
-	for {
-		elem, bytes, err = scan(bytes)
+func DecodeDict(bytes []byte) (DataDict, error) {
+	res := make(DataDict)
+	for 0 < len(bytes) {
+		elem, tail, err := scan(bytes)
 		if err != nil {
-			break
+			return nil, err
 		}
 		res[elem.Key] = elem
+		bytes = tail
 	}
-	return res
+	return res, nil
+}
+
+// Decode data from byte buffer.
+// Deprecated API.
+func Dec(bytes []byte) Data {
+	data, err := Decode(bytes)
+	if err != nil {
+		log.Fatalf("deprecated API: %s", err)
+	}
+	return data
+}
+
+// Decode data from byte buffer to dictionary.
+// Deprecated API.
+func Decd(bytes []byte) DataDict {
+	data, err := DecodeDict(bytes)
+	if err != nil {
+		log.Fatalf("deprecated API: %s", err)
+	}
+	return data
 }
 
 // String field getter.
@@ -128,6 +177,16 @@ func (d *DataDict) GetString(key Key, def string) string {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == String {
 			return elem.Value.(string)
+		}
+	}
+	return def
+}
+
+// uint32 field getter.
+func (d *DataDict) GetUint32(key Key, def uint32) uint32 {
+	if elem, ok := (*d)[key]; ok {
+		if elem.FType == Uint32 {
+			return elem.Value.(uint32)
 		}
 	}
 	return def
@@ -148,6 +207,36 @@ func (d *DataDict) GetDouble(key Key, def float64) float64 {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == Double {
 			return elem.Value.(float64)
+		}
+	}
+	return def
+}
+
+// list of uint32 field getter.
+func (d *DataDict) GetListOfUint32(key Key, def []uint32) []uint32 {
+	if elem, ok := (*d)[key]; ok {
+		if elem.FType == List_of_Uint32 {
+			return elem.Value.([]uint32)
+		}
+	}
+	return def
+}
+
+// list of string field getter.
+func (d *DataDict) GetListOfString(key Key, def []string) []string {
+	if elem, ok := (*d)[key]; ok {
+		if elem.FType == List_of_String {
+			return elem.Value.([]string)
+		}
+	}
+	return def
+}
+
+// list of double field getter.
+func (d *DataDict) GetListOfDouble(key Key, def []float64) []float64 {
+	if elem, ok := (*d)[key]; ok {
+		if elem.FType == List_of_Double {
+			return elem.Value.([]float64)
 		}
 	}
 	return def
@@ -324,14 +413,27 @@ func (e1 *Elem) Equals(e2 *Elem) bool {
 }
 
 // Encode data element to bytes.
+// Deprecated API.
 func (e *Elem) encode() []byte {
-	body := encode_val(e.FType, e.Value)
+	encoded, err := e.Encode()
+	if err != nil {
+		log.Fatalf("deprecated API: %s", err)
+	}
+	return encoded
+}
+
+// Encode data element to bytes.
+func (e *Elem) Encode() ([]byte, error) {
+	body, err := e.encodeValue()
+	if err != nil {
+		return nil, err
+	}
 	res := make([]byte, len(body)+5)
 	copy(res[5:], body)
 	binary.BigEndian.PutUint16(res[0:2], uint16(e.Key))
 	res[2] = uint8(e.FType)
 	binary.BigEndian.PutUint16(res[3:5], uint16(len(body)))
-	return res
+	return res, nil
 }
 
 // Decode next element from byte slice.
@@ -340,45 +442,126 @@ func scan(bytes []byte) (elem *Elem, tail []byte, err error) {
 		return nil, bytes, errors.New("EOF")
 	}
 	if len(bytes) < 5 {
-		return nil, bytes, errors.New("incomplete element header")
+		return nil, bytes, errors.New("decode: incomplete element header")
 	}
 	key := Key(binary.BigEndian.Uint16(bytes[0:2]))
 	ftype := FType(bytes[2])
 	body_len := binary.BigEndian.Uint16(bytes[3:5])
-	value := decode_val(ftype, bytes[5:5+body_len])
+	if len(bytes) < int(body_len)+5 {
+		return nil, nil, fmt.Errorf(
+			"decode: broken elem key#%d ftype=%d. expected body len %d but %d found",
+			key, ftype, body_len, len(bytes)-5)
+	}
+	value, err := decodeValue(ftype, bytes[5:5+body_len])
+	if err != nil {
+		return nil, nil, err
+	}
 	return &Elem{key, ftype, value}, bytes[5+body_len:], nil
 }
 
 // Encode element value to bytes.
-func encode_val(t FType, v0 interface{}) (r []byte) {
-	switch t {
+// Deprecated API
+func encode_val(t FType, i interface{}) (r []byte) {
+	elem := &Elem{
+		FType: t,
+		Value: i,
+	}
+	bytes, err := elem.encodeValue()
+	if err != nil {
+		log.Fatalf("deprecated API: %s", err)
+	}
+	return bytes
+}
+
+// Encode element value to bytes.
+func (e *Elem) encodeValue() ([]byte, error) {
+	switch e.FType {
 	case Bool:
-		if v0.(bool) {
-			r = []byte{1}
+		switch e.Value.(type) {
+		case bool:
+		default:
+			return nil, fmt.Errorf("encode: bad Bool key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		if e.Value.(bool) {
+			return []byte{1}, nil
 		} else {
-			r = []byte{0}
+			return []byte{0}, nil
 		}
 	case Uint8:
-		r = []byte{v0.(uint8)}
+		switch e.Value.(type) {
+		case uint8:
+		default:
+			return nil, fmt.Errorf("encode: bad Uint8 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		return []byte{e.Value.(uint8)}, nil
 	case Uint16:
-		r = make([]byte, 2)
-		binary.BigEndian.PutUint16(r, v0.(uint16))
+		switch e.Value.(type) {
+		case uint16:
+		default:
+			return nil, fmt.Errorf("encode: bad Uint16 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		res := make([]byte, 2)
+		binary.BigEndian.PutUint16(res, e.Value.(uint16))
+		return res, nil
 	case Uint24:
-		r = make([]byte, 3)
-		enc_uint24(r, v0.(uint32))
+		switch e.Value.(type) {
+		case uint32:
+		default:
+			return nil, fmt.Errorf("encode: bad Uint24 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		res := make([]byte, 3)
+		enc_uint24(res, e.Value.(uint32))
+		return res, nil
 	case Uint32:
-		r = make([]byte, 4)
-		binary.BigEndian.PutUint32(r, v0.(uint32))
+		switch e.Value.(type) {
+		case uint32:
+		default:
+			return nil, fmt.Errorf("encode: bad Uint32 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		res := make([]byte, 4)
+		binary.BigEndian.PutUint32(res, e.Value.(uint32))
+		return res, nil
 	case Uint64:
-		r = make([]byte, 8)
-		binary.BigEndian.PutUint64(r, v0.(uint64))
+		switch e.Value.(type) {
+		case uint64:
+		default:
+			return nil, fmt.Errorf("encode: bad Uint64 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		res := make([]byte, 8)
+		binary.BigEndian.PutUint64(res, e.Value.(uint64))
+		return res, nil
 	case Double:
-		r = make([]byte, 8)
-		binary.BigEndian.PutUint64(r, math.Float64bits(v0.(float64)))
+		switch e.Value.(type) {
+		case float64:
+		default:
+			return nil, fmt.Errorf("encode: bad Double key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		res := make([]byte, 8)
+		binary.BigEndian.PutUint64(res, math.Float64bits(e.Value.(float64)))
+		return res, nil
 	case String:
-		r = []byte(v0.(string))
+		switch e.Value.(type) {
+		case string:
+		default:
+			return nil, fmt.Errorf("encode: bad String key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		return []byte(e.Value.(string)), nil
 	case Bitmap:
-		v := v0.([]bool)
+		switch e.Value.(type) {
+		case []bool:
+		default:
+			return nil, fmt.Errorf("encode: bad Bitmap key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		v := e.Value.([]bool)
 		l := len(v) / 8
 		rem := len(v) % 8
 		var unused uint8
@@ -386,8 +569,8 @@ func encode_val(t FType, v0 interface{}) (r []byte) {
 			l++
 			unused = 8 - uint8(rem)
 		}
-		r = make([]byte, l+1)
-		r[0] = unused
+		res := make([]byte, l+1)
+		res[0] = unused
 		for i, b := range v {
 			if !b {
 				continue
@@ -396,24 +579,65 @@ func encode_val(t FType, v0 interface{}) (r []byte) {
 			byte_offset := major_bit_offset / 8
 			minor_bit_offset := major_bit_offset % 8
 			mask := uint8(1 << (7 - uint8(minor_bit_offset)))
-			r[byte_offset+1] |= mask
+			res[byte_offset+1] |= mask
 		}
+		return res, nil
 	case Int8:
-		r = []byte{uint8(v0.(int8))}
+		switch e.Value.(type) {
+		case int8:
+		default:
+			return nil, fmt.Errorf("encode: bad Int8 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		return []byte{uint8(e.Value.(int8))}, nil
 	case Int16:
-		r = make([]byte, 2)
-		binary.BigEndian.PutUint16(r, uint16(v0.(int16)))
+		switch e.Value.(type) {
+		case int16:
+		default:
+			return nil, fmt.Errorf("encode: bad Int16 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		res := make([]byte, 2)
+		binary.BigEndian.PutUint16(res, uint16(e.Value.(int16)))
+		return res, nil
 	case Int24:
-		r = make([]byte, 3)
-		enc_int24(r, v0.(int32))
+		switch e.Value.(type) {
+		case int32:
+		default:
+			return nil, fmt.Errorf("encode: bad Int24 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		res := make([]byte, 3)
+		enc_int24(res, e.Value.(int32))
+		return res, nil
 	case Int32:
-		r = make([]byte, 4)
-		binary.BigEndian.PutUint32(r, uint32(v0.(int32)))
+		switch e.Value.(type) {
+		case int32:
+		default:
+			return nil, fmt.Errorf("encode: bad Int32 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		res := make([]byte, 4)
+		binary.BigEndian.PutUint32(res, uint32(e.Value.(int32)))
+		return res, nil
 	case Int64:
-		r = make([]byte, 8)
-		binary.BigEndian.PutUint64(r, uint64(v0.(int64)))
+		switch e.Value.(type) {
+		case int64:
+		default:
+			return nil, fmt.Errorf("encode: bad Int64 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		res := make([]byte, 8)
+		binary.BigEndian.PutUint64(res, uint64(e.Value.(int64)))
+		return res, nil
 	case List_of_String:
-		v := v0.([]string)
+		switch e.Value.(type) {
+		case []string:
+		default:
+			return nil, fmt.Errorf("encode: bad List_of_String key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		v := e.Value.([]string)
 		tmp := make([][]byte, len(v)*2)
 		for i, s := range v {
 			tmp[i*2] = make([]byte, 2)
@@ -421,96 +645,203 @@ func encode_val(t FType, v0 interface{}) (r []byte) {
 			tmp[i*2+1] = bytes
 			binary.BigEndian.PutUint16(tmp[i*2], uint16(len(bytes)))
 		}
-		r = bytes.Join(tmp, []byte{})
+		return bytes.Join(tmp, []byte{}), nil
 	case List_of_Uint8:
-		r = []byte(v0.([]uint8))
+		switch e.Value.(type) {
+		case []uint8:
+		default:
+			return nil, fmt.Errorf("encode: bad List_of_Uint8 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
+		}
+		return []byte(e.Value.([]uint8)), nil
 	case List_of_Uint16:
-		v := v0.([]uint16)
-		r = make([]byte, len(v)*2)
-		for i, n := range v {
-			binary.BigEndian.PutUint16(r[i*2:(i+1)*2], n)
+		switch e.Value.(type) {
+		case []uint16:
+		default:
+			return nil, fmt.Errorf("encode: bad List_of_Uint16 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
 		}
+		v := e.Value.([]uint16)
+		res := make([]byte, len(v)*2)
+		for i, n := range v {
+			binary.BigEndian.PutUint16(res[i*2:(i+1)*2], n)
+		}
+		return res, nil
 	case List_of_Uint24:
-		v := v0.([]uint32)
-		r = make([]byte, len(v)*3)
-		for i, n := range v {
-			enc_uint24(r[i*3:(i+1)*3], n)
+		switch e.Value.(type) {
+		case []uint32:
+		default:
+			return nil, fmt.Errorf("encode: bad List_of_Uint24 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
 		}
+		v := e.Value.([]uint32)
+		res := make([]byte, len(v)*3)
+		for i, n := range v {
+			enc_uint24(res[i*3:(i+1)*3], n)
+		}
+		return res, nil
 	case List_of_Uint32:
-		v := v0.([]uint32)
-		r = make([]byte, len(v)*4)
-		for i, n := range v {
-			binary.BigEndian.PutUint32(r[i*4:(i+1)*4], n)
+		switch e.Value.(type) {
+		case []uint32:
+		default:
+			return nil, fmt.Errorf("encode: bad List_of_Uint32 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
 		}
+		v := e.Value.([]uint32)
+		res := make([]byte, len(v)*4)
+		for i, n := range v {
+			binary.BigEndian.PutUint32(res[i*4:(i+1)*4], n)
+		}
+		return res, nil
 	case List_of_Uint64:
-		v := v0.([]uint64)
-		r = make([]byte, len(v)*8)
-		for i, n := range v {
-			binary.BigEndian.PutUint64(r[i*8:(i+1)*8], n)
+		switch e.Value.(type) {
+		case []uint64:
+		default:
+			return nil, fmt.Errorf("encode: bad List_of_Uint64 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
 		}
+		v := e.Value.([]uint64)
+		res := make([]byte, len(v)*8)
+		for i, n := range v {
+			binary.BigEndian.PutUint64(res[i*8:(i+1)*8], n)
+		}
+		return res, nil
 	case List_of_Double:
-		v := v0.([]float64)
-		r = make([]byte, len(v)*8)
-		for i, n := range v {
-			binary.BigEndian.PutUint64(r[i*8:(i+1)*8], math.Float64bits(n))
+		switch e.Value.(type) {
+		case []float64:
+		default:
+			return nil, fmt.Errorf("encode: bad List_of_Double key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
 		}
+		v := e.Value.([]float64)
+		res := make([]byte, len(v)*8)
+		for i, n := range v {
+			binary.BigEndian.PutUint64(res[i*8:(i+1)*8], math.Float64bits(n))
+		}
+		return res, nil
 	case List_of_Int8:
-		v := v0.([]int8)
-		r = make([]byte, len(v))
-		for i, n := range v {
-			r[i] = uint8(n)
+		switch e.Value.(type) {
+		case []int8:
+		default:
+			return nil, fmt.Errorf("encode: bad List_of_Int8 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
 		}
+		v := e.Value.([]int8)
+		res := make([]byte, len(v))
+		for i, n := range v {
+			res[i] = uint8(n)
+		}
+		return res, nil
 	case List_of_Int16:
-		v := v0.([]int16)
-		r = make([]byte, len(v)*2)
-		for i, n := range v {
-			binary.BigEndian.PutUint16(r[i*2:(i+1)*2], uint16(n))
+		switch e.Value.(type) {
+		case []int16:
+		default:
+			return nil, fmt.Errorf("encode: bad List_of_Int16 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
 		}
+		v := e.Value.([]int16)
+		res := make([]byte, len(v)*2)
+		for i, n := range v {
+			binary.BigEndian.PutUint16(res[i*2:(i+1)*2], uint16(n))
+		}
+		return res, nil
 	case List_of_Int24:
-		v := v0.([]int32)
-		r = make([]byte, len(v)*3)
-		for i, n := range v {
-			enc_int24(r[i*3:(i+1)*3], n)
+		switch e.Value.(type) {
+		case []int32:
+		default:
+			return nil, fmt.Errorf("encode: bad List_of_Int24 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
 		}
+		v := e.Value.([]int32)
+		res := make([]byte, len(v)*3)
+		for i, n := range v {
+			enc_int24(res[i*3:(i+1)*3], n)
+		}
+		return res, nil
 	case List_of_Int32:
-		v := v0.([]int32)
-		r = make([]byte, len(v)*4)
-		for i, n := range v {
-			binary.BigEndian.PutUint32(r[i*4:(i+1)*4], uint32(n))
+		switch e.Value.(type) {
+		case []int32:
+		default:
+			return nil, fmt.Errorf("encode: bad List_of_Int32 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
 		}
+		v := e.Value.([]int32)
+		res := make([]byte, len(v)*4)
+		for i, n := range v {
+			binary.BigEndian.PutUint32(res[i*4:(i+1)*4], uint32(n))
+		}
+		return res, nil
 	case List_of_Int64:
-		v := v0.([]int64)
-		r = make([]byte, len(v)*8)
-		for i, n := range v {
-			binary.BigEndian.PutUint64(r[i*8:(i+1)*8], uint64(n))
+		switch e.Value.(type) {
+		case []int64:
+		default:
+			return nil, fmt.Errorf("encode: bad List_of_Int64 key#%d: %#v (%T)",
+				e.Key, e.Value, e.Value)
 		}
-	default:
-		log.Fatalf("ktlv encoder> unknown field type: %v", t)
+		v := e.Value.([]int64)
+		res := make([]byte, len(v)*8)
+		for i, n := range v {
+			binary.BigEndian.PutUint64(res[i*8:(i+1)*8], uint64(n))
+		}
+		return res, nil
 	}
-	return r
+	return nil, fmt.Errorf("encode: unknown field type for key#%d: %d", e.Key, e.FType)
 }
 
 // Decode element value from byte slice.
-func decode_val(t FType, b []byte) interface{} {
-	var value interface{} = nil
+// Deprecated API.
+func decode_val(t FType, bytes []byte) interface{} {
+	res, err := decodeValue(t, bytes)
+	if err != nil {
+		log.Fatalf("deprecated API: %s", err)
+	}
+	return res
+}
+
+// Decode element value from byte slice.
+func decodeValue(t FType, b []byte) (interface{}, error) {
 	switch t {
 	case Bool:
-		return b[0] == 1
+		if len(b) != 1 {
+			return nil, fmt.Errorf("decode: bad Bool len: %d", len(b))
+		}
+		return b[0] == 1, nil
 	case Uint8:
-		return b[0]
+		if len(b) != 1 {
+			return nil, fmt.Errorf("decode: bad Uint8 len: %d", len(b))
+		}
+		return b[0], nil
 	case Uint16:
-		return binary.BigEndian.Uint16(b)
+		if len(b) != 2 {
+			return nil, fmt.Errorf("decode: bad Uint16 len: %d", len(b))
+		}
+		return binary.BigEndian.Uint16(b), nil
 	case Uint24:
-		return dec_uint24(b)
+		if len(b) != 3 {
+			return nil, fmt.Errorf("decode: bad Uint24 len: %d", len(b))
+		}
+		return dec_uint24(b), nil
 	case Uint32:
-		return binary.BigEndian.Uint32(b)
+		if len(b) != 4 {
+			return nil, fmt.Errorf("decode: bad Uint32 len: %d", len(b))
+		}
+		return binary.BigEndian.Uint32(b), nil
 	case Uint64:
-		return binary.BigEndian.Uint64(b)
+		if len(b) != 8 {
+			return nil, fmt.Errorf("decode: bad Uint64 len: %d", len(b))
+		}
+		return binary.BigEndian.Uint64(b), nil
 	case Double:
-		return math.Float64frombits(binary.BigEndian.Uint64(b))
+		if len(b) != 8 {
+			return nil, fmt.Errorf("decode: bad Double len: %d", len(b))
+		}
+		return math.Float64frombits(binary.BigEndian.Uint64(b)), nil
 	case String:
-		return string(b)
+		return string(b), nil
 	case Bitmap:
+		if len(b) == 0 {
+			return nil, fmt.Errorf("decode: bad Bitmap len: %d", len(b))
+		}
 		unused := b[0]
 		bit_len := (len(b)-1)*8 - int(unused)
 		r := make([]bool, bit_len)
@@ -521,91 +852,138 @@ func decode_val(t FType, b []byte) interface{} {
 			mask := uint8(1 << (7 - uint8(minor_bit_offset)))
 			r[i] = 0 < b[byte_offset+1]&mask
 		}
-		return r
+		return r, nil
 	case Int8:
-		return int8(b[0])
-	case Int16:
-		return int16(binary.BigEndian.Uint16(b))
-	case Int24:
-		return dec_int24(b)
-	case Int32:
-		return int32(binary.BigEndian.Uint32(b))
-	case Int64:
-		return int64(binary.BigEndian.Uint64(b))
-	case List_of_String:
-		r := make([]string, 0)
-		for i := 0; i < len(b); {
-			l := int(binary.BigEndian.Uint16(b[i : i+2]))
-			r = append(r, string(b[i+2:i+2+l]))
-			i += l + 2
+		if len(b) != 1 {
+			return nil, fmt.Errorf("decode: bad Int8 len: %d", len(b))
 		}
-		return r
+		return int8(b[0]), nil
+	case Int16:
+		if len(b) != 2 {
+			return nil, fmt.Errorf("decode: bad Int16 len: %d", len(b))
+		}
+		return int16(binary.BigEndian.Uint16(b)), nil
+	case Int24:
+		if len(b) != 3 {
+			return nil, fmt.Errorf("decode: bad Int24 len: %d", len(b))
+		}
+		return dec_int24(b), nil
+	case Int32:
+		if len(b) != 4 {
+			return nil, fmt.Errorf("decode: bad Int32 len: %d", len(b))
+		}
+		return int32(binary.BigEndian.Uint32(b)), nil
+	case Int64:
+		if len(b) != 8 {
+			return nil, fmt.Errorf("decode: bad Int64 len: %d", len(b))
+		}
+		return int64(binary.BigEndian.Uint64(b)), nil
+	case List_of_String:
+		res := make([]string, 0)
+		tail := b
+		for 0 < len(tail) {
+			if len(tail) < 2 {
+				return nil, fmt.Errorf("decode: broken List_of_String (elem length)")
+			}
+			l := int(binary.BigEndian.Uint16(tail))
+			if len(tail) < 2+l {
+				return nil, fmt.Errorf("decode: broken List_of_String (elem value)")
+			}
+			res = append(res, string(tail[2:2+l]))
+			tail = tail[2+l:]
+		}
+		return res, nil
 	case List_of_Uint8:
-		return []uint8(b)
+		return []uint8(b), nil
 	case List_of_Uint16:
+		if len(b)%2 != 0 {
+			return nil, fmt.Errorf("decode: bad List_of_Uint16 len: %d", len(b))
+		}
 		r := make([]uint16, len(b)/2)
 		for i := 0; i < len(r); i++ {
 			r[i] = binary.BigEndian.Uint16(b[i*2 : (i+1)*2])
 		}
-		return r
+		return r, nil
 	case List_of_Uint24:
+		if len(b)%3 != 0 {
+			return nil, fmt.Errorf("decode: bad List_of_Uint24 len: %d", len(b))
+		}
 		r := make([]uint32, len(b)/3)
 		for i := 0; i < len(r); i++ {
 			r[i] = dec_uint24(b[i*3 : (i+1)*3])
 		}
-		return r
+		return r, nil
 	case List_of_Uint32:
+		if len(b)%4 != 0 {
+			return nil, fmt.Errorf("decode: bad List_of_Uint32 len: %d", len(b))
+		}
 		r := make([]uint32, len(b)/4)
 		for i := 0; i < len(r); i++ {
 			r[i] = binary.BigEndian.Uint32(b[i*4 : (i+1)*4])
 		}
-		return r
+		return r, nil
 	case List_of_Uint64:
+		if len(b)%8 != 0 {
+			return nil, fmt.Errorf("decode: bad List_of_Uint64 len: %d", len(b))
+		}
 		r := make([]uint64, len(b)/8)
 		for i := 0; i < len(r); i++ {
 			r[i] = binary.BigEndian.Uint64(b[i*8 : (i+1)*8])
 		}
-		return r
+		return r, nil
 	case List_of_Double:
+		if len(b)%8 != 0 {
+			return nil, fmt.Errorf("decode: bad List_of_Double len: %d", len(b))
+		}
 		r := make([]float64, len(b)/8)
 		for i := 0; i < len(r); i++ {
 			r[i] = math.Float64frombits(binary.BigEndian.Uint64(b[i*8 : (i+1)*8]))
 		}
-		return r
+		return r, nil
 	case List_of_Int8:
 		r := make([]int8, len(b))
 		for i, n := range b {
 			r[i] = int8(n)
 		}
-		return r
+		return r, nil
 	case List_of_Int16:
+		if len(b)%2 != 0 {
+			return nil, fmt.Errorf("decode: bad List_of_Int16 len: %d", len(b))
+		}
 		r := make([]int16, len(b)/2)
 		for i := 0; i < len(r); i++ {
 			r[i] = int16(binary.BigEndian.Uint16(b[i*2 : (i+1)*2]))
 		}
-		return r
+		return r, nil
 	case List_of_Int24:
+		if len(b)%3 != 0 {
+			return nil, fmt.Errorf("decode: bad List_of_Int24 len: %d", len(b))
+		}
 		r := make([]int32, len(b)/3)
 		for i := 0; i < len(r); i++ {
 			r[i] = dec_int24(b[i*3 : (i+1)*3])
 		}
-		return r
+		return r, nil
 	case List_of_Int32:
+		if len(b)%4 != 0 {
+			return nil, fmt.Errorf("decode: bad List_of_Int32 len: %d", len(b))
+		}
 		r := make([]int32, len(b)/4)
 		for i := 0; i < len(r); i++ {
 			r[i] = int32(binary.BigEndian.Uint32(b[i*4 : (i+1)*4]))
 		}
-		return r
+		return r, nil
 	case List_of_Int64:
+		if len(b)%8 != 0 {
+			return nil, fmt.Errorf("decode: bad List_of_Int64 len: %d", len(b))
+		}
 		r := make([]int64, len(b)/8)
 		for i := 0; i < len(r); i++ {
 			r[i] = int64(binary.BigEndian.Uint64(b[i*8 : (i+1)*8]))
 		}
-		return r
-	default:
-		log.Fatalf("ktlv decoder> unknown field type: %v", t)
+		return r, nil
 	}
-	return value
+	return nil, fmt.Errorf("decode: unknown field type: %d", t)
 }
 
 // Encode unsigned int24 to byte slice.
