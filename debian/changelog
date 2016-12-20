@@ -1,3 +1,10 @@
+ktlv (0.7.0) unstable; urgency=low
+
+  * golang: add new API without panics
+  * gitignore *.swp files
+
+ -- Aleksey Morarash <aleksey.morarash@gmail.com>  Tue, 20 Dec 2016 21:56:36 +0200
+
 ktlv (0.6.0) unstable; urgency=low
 
   * golang: extend API with field getters
