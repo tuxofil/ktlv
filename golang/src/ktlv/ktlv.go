@@ -182,6 +182,26 @@ func (d *DataDict) GetString(key Key, def string) string {
 	return def
 }
 
+// bool field getter.
+func (d *DataDict) GetBool(key Key, def bool) bool {
+	if elem, ok := (*d)[key]; ok {
+		if elem.FType == Bool {
+			return elem.Value.(bool)
+		}
+	}
+	return def
+}
+
+// uint8 field getter.
+func (d *DataDict) GetUint8(key Key, def uint8) uint8 {
+	if elem, ok := (*d)[key]; ok {
+		if elem.FType == Uint8 {
+			return elem.Value.(uint8)
+		}
+	}
+	return def
+}
+
 // uint32 field getter.
 func (d *DataDict) GetUint32(key Key, def uint32) uint32 {
 	if elem, ok := (*d)[key]; ok {
