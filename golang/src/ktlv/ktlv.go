@@ -202,6 +202,16 @@ func (d *DataDict) GetUint8(key Key, def uint8) uint8 {
 	return def
 }
 
+// uint16 field getter.
+func (d *DataDict) GetUint16(key Key, def uint16) uint16 {
+	if elem, ok := (*d)[key]; ok {
+		if elem.FType == Uint16 {
+			return elem.Value.(uint16)
+		}
+	}
+	return def
+}
+
 // uint32 field getter.
 func (d *DataDict) GetUint32(key Key, def uint32) uint32 {
 	if elem, ok := (*d)[key]; ok {
