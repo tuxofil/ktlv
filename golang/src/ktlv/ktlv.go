@@ -74,6 +74,11 @@ type Data []*Elem
 
 type DataDict map[Key]*Elem
 
+var (
+	ElementNotFound     = errors.New("no such element")
+	TypeAssertionFailed = errors.New("unexpected element type")
+)
+
 // Encode input data to byte buffer.
 func (d Data) Encode() ([]byte, error) {
 	buffer := bytes.NewBuffer([]byte{})
@@ -173,11 +178,20 @@ func Decd(bytes []byte) DataDict {
 }
 
 // String field getter.
-func (d *DataDict) GetStringDef(key Key, def string) string {
+func (d *DataDict) GetString(key Key) (string, error) {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == String {
-			return elem.Value.(string)
+			return elem.Value.(string), nil
 		}
+		return "", TypeAssertionFailed
+	}
+	return "", ElementNotFound
+}
+
+// String field getter.
+func (d *DataDict) GetStringDef(key Key, def string) string {
+	if v, err := d.GetString(key); err == nil {
+		return v
 	}
 	return def
 }
@@ -223,21 +237,39 @@ func (d *DataDict) GetUint32Def(key Key, def uint32) uint32 {
 }
 
 // uint64 field getter.
-func (d *DataDict) GetUint64Def(key Key, def uint64) uint64 {
+func (d *DataDict) GetUint64(key Key) (uint64, error) {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == Uint64 {
-			return elem.Value.(uint64)
+			return elem.Value.(uint64), nil
 		}
+		return 0, TypeAssertionFailed
+	}
+	return 0, ElementNotFound
+}
+
+// uint64 field getter.
+func (d *DataDict) GetUint64Def(key Key, def uint64) uint64 {
+	if v, err := d.GetUint64(key); err == nil {
+		return v
 	}
 	return def
 }
 
 // double field getter.
-func (d *DataDict) GetDoubleDef(key Key, def float64) float64 {
+func (d *DataDict) GetDouble(key Key) (float64, error) {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == Double {
-			return elem.Value.(float64)
+			return elem.Value.(float64), nil
 		}
+		return 0, TypeAssertionFailed
+	}
+	return 0, ElementNotFound
+}
+
+// double field getter.
+func (d *DataDict) GetDoubleDef(key Key, def float64) float64 {
+	if v, err := d.GetDouble(key); err == nil {
+		return v
 	}
 	return def
 }
