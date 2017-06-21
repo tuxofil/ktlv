@@ -1,3 +1,10 @@
+ktlv (1.0.0) unstable; urgency=low
+
+  * golang: add getters without default for some types
+  * API change: rename getters with default values to *Def
+
+ -- Aleksey Morarash <aleksey.morarash@gmail.com>  Wed, 21 Jun 2017 21:42:45 +0300
+
 ktlv (0.9.0) unstable; urgency=low
 
   * golang: implement DataDict.GetUint16() method
