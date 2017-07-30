@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"math"
 )
@@ -496,6 +497,26 @@ func (e *Elem) Encode() ([]byte, error) {
 	res[2] = uint8(e.FType)
 	binary.BigEndian.PutUint16(res[3:5], uint16(len(body)))
 	return res, nil
+}
+
+func (e *Elem) WriteTo(writer io.Writer) (n int, err error) {
+	encodedValue, err := e.encodeValue()
+	if err != nil {
+		return 0, err
+	}
+	header := make([]byte, 5)
+	binary.BigEndian.PutUint16(header, uint16(e.Key))
+	header[2] = uint8(e.FType)
+	binary.BigEndian.PutUint16(header[3:], uint16(len(encodedValue)))
+	n1, err := writer.Write(header)
+	if err != nil {
+		return n1, err
+	}
+	n2, err := writer.Write(encodedValue)
+	if err != nil {
+		return n2, err
+	}
+	return n1 + n2, nil
 }
 
 // Decode next element from byte slice.
