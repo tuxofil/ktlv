@@ -1,3 +1,9 @@
+ktlv (1.1.0) unstable; urgency=low
+
+  * golang: add io.Writer-based encoding API
+
+ -- Aleksey Morarash <aleksey.morarash@gmail.com>  Sun, 30 Jul 2017 22:54:26 +0300
+
 ktlv (1.0.0) unstable; urgency=low
 
   * golang: add getters without default for some types
