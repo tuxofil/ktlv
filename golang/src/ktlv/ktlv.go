@@ -61,6 +61,39 @@ const (
 	Max_Uint64 = uint64(0xffffffffffffffff)
 )
 
+var t2s = map[FType]string{
+	Bool:           "Bool",
+	Uint8:          "Uint8",
+	Uint16:         "Uint16",
+	Uint24:         "Uint24",
+	Uint32:         "Uint32",
+	Uint64:         "Uint64",
+	Double:         "Double",
+	String:         "String",
+	Bitmap:         "Bitmap",
+	Int8:           "Int8",
+	Int16:          "Int16",
+	Int24:          "Int24",
+	Int32:          "Int32",
+	Int64:          "Int64",
+	List_of_String: "List_of_String",
+	List_of_Uint8:  "List_of_Uint8",
+	List_of_Uint16: "List_of_Uint16",
+	List_of_Uint24: "List_of_Uint24",
+	List_of_Uint32: "List_of_Uint32",
+	List_of_Uint64: "List_of_Uint64",
+	List_of_Double: "List_of_Double",
+	List_of_Int8:   "List_of_Int8",
+	List_of_Int16:  "List_of_Int16",
+	List_of_Int24:  "List_of_Int24",
+	List_of_Int32:  "List_of_Int32",
+	List_of_Int64:  "List_of_Int64",
+}
+
+func FTypeToString(t FType) string {
+	return t2s[t]
+}
+
 type Key uint16
 
 type FType uint8
@@ -108,6 +141,29 @@ func (d DataDict) Encode() ([]byte, error) {
 		}
 	}
 	return buffer.Bytes(), nil
+}
+
+func (d DataDict) Put(k Key, t FType, v interface{}) {
+	d[k] = &Elem{k, t, v}
+}
+
+func (d DataDict) Get(k Key) (t FType, v interface{}, ok bool) {
+	if elem, ok := d[k]; ok {
+		return elem.FType, elem.Value, true
+	}
+	return 0, nil, false
+}
+
+func (d DataDict) String() string {
+	s := ""
+	for k, e := range d {
+		if s != "" {
+			s += ","
+		}
+		s += fmt.Sprintf("%d(%s)=%#v", k,
+			FTypeToString(e.FType), e.Value)
+	}
+	return s
 }
 
 // Encode input data to byte buffer.
@@ -208,6 +264,17 @@ func (d *DataDict) GetBoolDef(key Key, def bool) bool {
 }
 
 // uint8 field getter.
+func (d *DataDict) GetUint8(key Key) (uint8, error) {
+	if elem, ok := (*d)[key]; ok {
+		if elem.FType == Uint8 {
+			return elem.Value.(uint8), nil
+		}
+		return 0, TypeAssertionFailed
+	}
+	return 0, ElementNotFound
+}
+
+// uint8 field getter.
 func (d *DataDict) GetUint8Def(key Key, def uint8) uint8 {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == Uint8 {
@@ -225,6 +292,17 @@ func (d *DataDict) GetUint16Def(key Key, def uint16) uint16 {
 		}
 	}
 	return def
+}
+
+// uint32 field getter.
+func (d *DataDict) GetUint32(key Key) (uint32, error) {
+	if elem, ok := (*d)[key]; ok {
+		if elem.FType == Uint32 {
+			return elem.Value.(uint32), nil
+		}
+		return 0, TypeAssertionFailed
+	}
+	return 0, ElementNotFound
 }
 
 // uint32 field getter.
@@ -271,6 +349,16 @@ func (d *DataDict) GetDouble(key Key) (float64, error) {
 func (d *DataDict) GetDoubleDef(key Key, def float64) float64 {
 	if v, err := d.GetDouble(key); err == nil {
 		return v
+	}
+	return def
+}
+
+// list of uint8 field getter.
+func (d *DataDict) GetListOfUint8Def(key Key, def []uint8) []uint8 {
+	if elem, ok := (*d)[key]; ok {
+		if elem.FType == List_of_Uint8 {
+			return elem.Value.([]uint8)
+		}
 	}
 	return def
 }
