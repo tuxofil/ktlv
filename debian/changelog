@@ -1,3 +1,9 @@
+ktlv (1.2.0) unstable; urgency=low
+
+  * golang: extend API
+
+ -- Aleksey Morarash <aleksey.morarash@gmail.com>  Tue, 19 Sep 2017 17:33:38 +0300
+
 ktlv (1.1.0) unstable; urgency=low
 
   * golang: add io.Writer-based encoding API
