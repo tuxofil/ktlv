@@ -323,7 +323,7 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 }
 
 // Decode element value from byte slice.
-func decodeValue(t FType, b []byte) (interface{}, error) {
+func decodeValue(t uint8, b []byte) (interface{}, error) {
 	switch t {
 	case Bool:
 		if len(b) != 1 {

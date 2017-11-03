@@ -60,7 +60,7 @@ const (
 	Max_Uint64 = uint64(0xffffffffffffffff)
 )
 
-var t2s = map[FType]string{
+var t2s = map[uint8]string{
 	Bool:           "Bool",
 	Uint8:          "Uint8",
 	Uint16:         "Uint16",
@@ -89,17 +89,15 @@ var t2s = map[FType]string{
 	List_of_Int64:  "List_of_Int64",
 }
 
-func FTypeToString(t FType) string {
+func FTypeToString(t uint8) string {
 	return t2s[t]
 }
 
 type Key uint16
 
-type FType uint8
-
 type Elem struct {
 	Key
-	FType
+	FType uint8
 	Value interface{}
 }
 
@@ -142,11 +140,11 @@ func (d DataDict) Encode() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (d DataDict) Put(k Key, t FType, v interface{}) {
-	d[k] = &Elem{k, t, v}
+func (d DataDict) Put(k Key, ftype uint8, v interface{}) {
+	d[k] = &Elem{k, ftype, v}
 }
 
-func (d DataDict) Get(k Key) (t FType, v interface{}, ok bool) {
+func (d DataDict) Get(k Key) (ftype uint8, v interface{}, ok bool) {
 	if elem, ok := d[k]; ok {
 		return elem.FType, elem.Value, true
 	}
@@ -372,7 +370,7 @@ func (d *Data) Dict() (dict DataDict) {
 }
 
 // Add new element to data dictionary.
-func (d *DataDict) Add(key Key, ftype FType, value interface{}) {
+func (d *DataDict) Add(key Key, ftype uint8, value interface{}) {
 	(*d)[key] = &Elem{key, ftype, value}
 }
 
@@ -419,7 +417,7 @@ func scan(bytes []byte) (elem *Elem, tail []byte, err error) {
 		return nil, bytes, errors.New("decode: incomplete element header")
 	}
 	key := Key(binary.BigEndian.Uint16(bytes[0:2]))
-	ftype := FType(bytes[2])
+	ftype := bytes[2]
 	body_len := binary.BigEndian.Uint16(bytes[3:5])
 	if len(bytes) < int(body_len)+5 {
 		return nil, nil, fmt.Errorf(
@@ -435,7 +433,7 @@ func scan(bytes []byte) (elem *Elem, tail []byte, err error) {
 
 // Encode element value to bytes.
 func (e *Elem) encodeValue() ([]byte, error) {
-	encoded, err := encodeValue(uint8(e.FType), e.Value)
+	encoded, err := encodeValue(e.FType, e.Value)
 	if err != nil {
 		return nil, fmt.Errorf("encode key#%d: %s", e.Key, err)
 	}

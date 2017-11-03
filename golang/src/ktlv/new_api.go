@@ -9,7 +9,7 @@ type KV struct {
 	Value interface{}
 }
 
-func Write(writer io.Writer, types []FType, elements ...KV) (int, error) {
+func Write(writer io.Writer, ftypes []uint8, elements ...KV) (int, error) {
 	var (
 		written int
 		elem    *Elem
@@ -17,7 +17,7 @@ func Write(writer io.Writer, types []FType, elements ...KV) (int, error) {
 	for _, kv := range elements {
 		elem = &Elem{
 			Key:   kv.Key,
-			FType: types[int(kv.Key)],
+			FType: ftypes[int(kv.Key)],
 			Value: kv.Value,
 		}
 		n, err := elem.WriteTo(writer)
