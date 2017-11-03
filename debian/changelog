@@ -1,3 +1,14 @@
+ktlv (2.0.0) unstable; urgency=low
+
+  * golang: add DecodeElem() API function
+  * golang: decoders return all successfully decoded elems on error
+  * golang: refactor, stage 2
+  * golang: remove redundant type Key
+  * golang: remove redundant type FType
+  * golang: refactor, remove deprecated API
+
+ -- Aleksey Morarash <aleksey.morarash@gmail.com>  Fri, 03 Nov 2017 14:09:50 +0200
+
 ktlv (1.2.0) unstable; urgency=low
 
   * golang: extend API
