@@ -1,8 +1,6 @@
 package ktlv
 
-import (
-	"bytes"
-)
+import "bytes"
 
 type List []*Elem
 
@@ -22,12 +20,14 @@ func (d List) Encode() ([]byte, error) {
 }
 
 // Decode data from byte buffer.
+// On error returns non nil value with all successfully decoded
+// elements.
 func DecodeList(bytes []byte) (List, error) {
-	res := make(List, 0)
+	res := List{}
 	for 0 < len(bytes) {
 		elem, tail, err := scan(bytes)
 		if err != nil {
-			return nil, err
+			return res, err
 		}
 		res = append(res, elem)
 		bytes = tail
@@ -37,7 +37,7 @@ func DecodeList(bytes []byte) (List, error) {
 
 // Convert list of elements to dict of elements.
 func (d List) Dict() (dict Dict) {
-	dict = make(Dict)
+	dict = Dict{}
 	for _, e := range d {
 		dict[e.Key] = e
 	}

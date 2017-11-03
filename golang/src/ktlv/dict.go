@@ -23,12 +23,14 @@ func (d Dict) Encode() ([]byte, error) {
 }
 
 // Decode data from byte buffer to dictionary.
+// On error returns non nil value with all successfully decoded
+// elements.
 func DecodeDict(bytes []byte) (Dict, error) {
-	res := make(Dict)
+	res := Dict{}
 	for 0 < len(bytes) {
 		elem, tail, err := scan(bytes)
 		if err != nil {
-			return nil, err
+			return res, err
 		}
 		res[elem.Key] = elem
 		bytes = tail
