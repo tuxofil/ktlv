@@ -26,6 +26,34 @@ func (e *Elem) Encode() ([]byte, error) {
 	return res, nil
 }
 
+// Search and decode one element with given key in octet stream.
+func DecodeElem(b []byte, key uint16) (*Elem, error) {
+	for {
+		bLen := len(b)
+		if bLen < 5 {
+			break
+		}
+		fKey := binary.BigEndian.Uint16(b)
+		fType := b[2]
+		fLen := int(binary.BigEndian.Uint16(b[3:]))
+		if tLen := bLen - 5; tLen < fLen {
+			return nil, fmt.Errorf("broken "+
+				"elem key#%d type=%d. expected body"+
+				" len is %d but %d found",
+				fKey, fType, fLen, tLen)
+		}
+		if fKey == key {
+			value, err := decodeValue(fType, b[5:5+fLen])
+			if err != nil {
+				return nil, err
+			}
+			return &Elem{fKey, fType, value}, nil
+		}
+		b = b[5+fLen:]
+	}
+	return nil, ElementNotFound
+}
+
 func (e *Elem) WriteTo(writer io.Writer) (n int, err error) {
 	encodedValue, err := e.encodeValue()
 	if err != nil {
