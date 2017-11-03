@@ -6,7 +6,10 @@ import (
 
 func encdec(t *testing.T, data0 Data) {
 	bytes := Enc(data0)
-	data1 := Dec(bytes)
+	data1, err := Decode(bytes)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(data0) != len(data1) {
 		t.Fatalf(
 			"encdec: origin data len is %v but encoded-decoded data len is %v",
@@ -21,8 +24,14 @@ func encdec(t *testing.T, data0 Data) {
 	}
 	// test dictionaries
 	ddata0 := data0.Dict()
-	bytes = Encd(ddata0)
-	ddata1 := Decd(bytes)
+	bytes, err = ddata0.Encode()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ddata1, err := DecodeDict(bytes)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(ddata0) != len(ddata1) {
 		t.Fatalf(
 			"encdec: dicts: origin data len is %v but encoded-decoded data len is %v",
