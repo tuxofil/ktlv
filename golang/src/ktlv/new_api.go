@@ -5,7 +5,7 @@ import (
 )
 
 type KV struct {
-	Key   Key
+	Key   uint16
 	Value interface{}
 }
 

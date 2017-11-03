@@ -93,17 +93,15 @@ func FTypeToString(t uint8) string {
 	return t2s[t]
 }
 
-type Key uint16
-
 type Elem struct {
-	Key
+	Key   uint16
 	FType uint8
 	Value interface{}
 }
 
 type Data []*Elem
 
-type DataDict map[Key]*Elem
+type DataDict map[uint16]*Elem
 
 var (
 	ElementNotFound     = errors.New("no such element")
@@ -140,12 +138,12 @@ func (d DataDict) Encode() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func (d DataDict) Put(k Key, ftype uint8, v interface{}) {
-	d[k] = &Elem{k, ftype, v}
+func (d DataDict) Put(key uint16, ftype uint8, v interface{}) {
+	d[key] = &Elem{key, ftype, v}
 }
 
-func (d DataDict) Get(k Key) (ftype uint8, v interface{}, ok bool) {
-	if elem, ok := d[k]; ok {
+func (d DataDict) Get(key uint16) (ftype uint8, v interface{}, ok bool) {
+	if elem, ok := d[key]; ok {
 		return elem.FType, elem.Value, true
 	}
 	return 0, nil, false
@@ -202,7 +200,7 @@ func DecodeDict(bytes []byte) (DataDict, error) {
 }
 
 // String field getter.
-func (d *DataDict) GetString(key Key) (string, error) {
+func (d *DataDict) GetString(key uint16) (string, error) {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == String {
 			return elem.Value.(string), nil
@@ -213,7 +211,7 @@ func (d *DataDict) GetString(key Key) (string, error) {
 }
 
 // String field getter.
-func (d *DataDict) GetStringDef(key Key, def string) string {
+func (d *DataDict) GetStringDef(key uint16, def string) string {
 	if v, err := d.GetString(key); err == nil {
 		return v
 	}
@@ -221,7 +219,7 @@ func (d *DataDict) GetStringDef(key Key, def string) string {
 }
 
 // bool field getter.
-func (d *DataDict) GetBoolDef(key Key, def bool) bool {
+func (d *DataDict) GetBoolDef(key uint16, def bool) bool {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == Bool {
 			return elem.Value.(bool)
@@ -231,7 +229,7 @@ func (d *DataDict) GetBoolDef(key Key, def bool) bool {
 }
 
 // uint8 field getter.
-func (d *DataDict) GetUint8(key Key) (uint8, error) {
+func (d *DataDict) GetUint8(key uint16) (uint8, error) {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == Uint8 {
 			return elem.Value.(uint8), nil
@@ -242,7 +240,7 @@ func (d *DataDict) GetUint8(key Key) (uint8, error) {
 }
 
 // uint8 field getter.
-func (d *DataDict) GetUint8Def(key Key, def uint8) uint8 {
+func (d *DataDict) GetUint8Def(key uint16, def uint8) uint8 {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == Uint8 {
 			return elem.Value.(uint8)
@@ -252,7 +250,7 @@ func (d *DataDict) GetUint8Def(key Key, def uint8) uint8 {
 }
 
 // uint16 field getter.
-func (d *DataDict) GetUint16Def(key Key, def uint16) uint16 {
+func (d *DataDict) GetUint16Def(key uint16, def uint16) uint16 {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == Uint16 {
 			return elem.Value.(uint16)
@@ -262,7 +260,7 @@ func (d *DataDict) GetUint16Def(key Key, def uint16) uint16 {
 }
 
 // uint32 field getter.
-func (d *DataDict) GetUint32(key Key) (uint32, error) {
+func (d *DataDict) GetUint32(key uint16) (uint32, error) {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == Uint32 {
 			return elem.Value.(uint32), nil
@@ -273,7 +271,7 @@ func (d *DataDict) GetUint32(key Key) (uint32, error) {
 }
 
 // uint32 field getter.
-func (d *DataDict) GetUint32Def(key Key, def uint32) uint32 {
+func (d *DataDict) GetUint32Def(key uint16, def uint32) uint32 {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == Uint32 {
 			return elem.Value.(uint32)
@@ -283,7 +281,7 @@ func (d *DataDict) GetUint32Def(key Key, def uint32) uint32 {
 }
 
 // uint64 field getter.
-func (d *DataDict) GetUint64(key Key) (uint64, error) {
+func (d *DataDict) GetUint64(key uint16) (uint64, error) {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == Uint64 {
 			return elem.Value.(uint64), nil
@@ -294,7 +292,7 @@ func (d *DataDict) GetUint64(key Key) (uint64, error) {
 }
 
 // uint64 field getter.
-func (d *DataDict) GetUint64Def(key Key, def uint64) uint64 {
+func (d *DataDict) GetUint64Def(key uint16, def uint64) uint64 {
 	if v, err := d.GetUint64(key); err == nil {
 		return v
 	}
@@ -302,7 +300,7 @@ func (d *DataDict) GetUint64Def(key Key, def uint64) uint64 {
 }
 
 // double field getter.
-func (d *DataDict) GetDouble(key Key) (float64, error) {
+func (d *DataDict) GetDouble(key uint16) (float64, error) {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == Double {
 			return elem.Value.(float64), nil
@@ -313,7 +311,7 @@ func (d *DataDict) GetDouble(key Key) (float64, error) {
 }
 
 // double field getter.
-func (d *DataDict) GetDoubleDef(key Key, def float64) float64 {
+func (d *DataDict) GetDoubleDef(key uint16, def float64) float64 {
 	if v, err := d.GetDouble(key); err == nil {
 		return v
 	}
@@ -321,7 +319,7 @@ func (d *DataDict) GetDoubleDef(key Key, def float64) float64 {
 }
 
 // list of uint8 field getter.
-func (d *DataDict) GetListOfUint8Def(key Key, def []uint8) []uint8 {
+func (d *DataDict) GetListOfUint8Def(key uint16, def []uint8) []uint8 {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == List_of_Uint8 {
 			return elem.Value.([]uint8)
@@ -331,7 +329,7 @@ func (d *DataDict) GetListOfUint8Def(key Key, def []uint8) []uint8 {
 }
 
 // list of uint32 field getter.
-func (d *DataDict) GetListOfUint32Def(key Key, def []uint32) []uint32 {
+func (d *DataDict) GetListOfUint32Def(key uint16, def []uint32) []uint32 {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == List_of_Uint32 {
 			return elem.Value.([]uint32)
@@ -341,7 +339,7 @@ func (d *DataDict) GetListOfUint32Def(key Key, def []uint32) []uint32 {
 }
 
 // list of string field getter.
-func (d *DataDict) GetListOfStringDef(key Key, def []string) []string {
+func (d *DataDict) GetListOfStringDef(key uint16, def []string) []string {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == List_of_String {
 			return elem.Value.([]string)
@@ -351,7 +349,7 @@ func (d *DataDict) GetListOfStringDef(key Key, def []string) []string {
 }
 
 // list of double field getter.
-func (d *DataDict) GetListOfDoubleDef(key Key, def []float64) []float64 {
+func (d *DataDict) GetListOfDoubleDef(key uint16, def []float64) []float64 {
 	if elem, ok := (*d)[key]; ok {
 		if elem.FType == List_of_Double {
 			return elem.Value.([]float64)
@@ -370,7 +368,7 @@ func (d *Data) Dict() (dict DataDict) {
 }
 
 // Add new element to data dictionary.
-func (d *DataDict) Add(key Key, ftype uint8, value interface{}) {
+func (d *DataDict) Add(key uint16, ftype uint8, value interface{}) {
 	(*d)[key] = &Elem{key, ftype, value}
 }
 
@@ -416,9 +414,9 @@ func scan(bytes []byte) (elem *Elem, tail []byte, err error) {
 	if len(bytes) < 5 {
 		return nil, bytes, errors.New("decode: incomplete element header")
 	}
-	key := Key(binary.BigEndian.Uint16(bytes[0:2]))
+	key := binary.BigEndian.Uint16(bytes[0:])
 	ftype := bytes[2]
-	body_len := binary.BigEndian.Uint16(bytes[3:5])
+	body_len := binary.BigEndian.Uint16(bytes[3:])
 	if len(bytes) < int(body_len)+5 {
 		return nil, nil, fmt.Errorf(
 			"decode: broken elem key#%d ftype=%d. expected body len %d but %d found",
