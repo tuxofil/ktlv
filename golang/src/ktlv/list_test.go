@@ -4,9 +4,12 @@ import (
 	"testing"
 )
 
-func encdec(t *testing.T, data0 Data) {
-	bytes := Enc(data0)
-	data1, err := Decode(bytes)
+func encdec(t *testing.T, data0 List) {
+	bytes, err := data0.Encode()
+	if err != nil {
+		t.Fatal(err)
+	}
+	data1, err := DecodeList(bytes)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,55 +48,55 @@ func encdec(t *testing.T, data0 Data) {
 }
 
 func TestBool(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, Bool, true},
 		&Elem{2, Bool, false}})
 }
 
 func TestUint8(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, Uint8, Min_Uint8},
 		&Elem{2, Uint8, Max_Uint8}})
 }
 
 func TestUint16(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, Uint16, Min_Uint16},
 		&Elem{2, Uint16, Max_Uint16}})
 }
 
 func TestUint24(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, Uint24, Min_Uint24},
 		&Elem{2, Uint24, Max_Uint24}})
 }
 
 func TestUint32(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, Uint32, Min_Uint32},
 		&Elem{2, Uint32, Max_Uint32}})
 }
 
 func TestUint64(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, Uint64, Min_Uint64},
 		&Elem{2, Uint64, Max_Uint64}})
 }
 
 func TestInt8(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, Int8, Min_Int8},
 		&Elem{2, Int8, Max_Int8}})
 }
 
 func TestInt16(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, Int16, Min_Int16},
 		&Elem{2, Int16, Max_Int16}})
 }
 
 func TestInt24(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, Int24, Min_Int24},
 		&Elem{4, Int24, int32(-1000)},
 		&Elem{2, Int24, int32(-1)},
@@ -104,19 +107,19 @@ func TestInt24(t *testing.T) {
 }
 
 func TestInt32(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, Int32, Min_Int32},
 		&Elem{2, Int32, Max_Int32}})
 }
 
 func TestInt64(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, Int64, Min_Int64},
 		&Elem{2, Int64, Max_Int64}})
 }
 
 func TestDouble(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, Double, float64(0.0)},
 		&Elem{2, Double, float64(-0.0)},
 		&Elem{3, Double, float64(-1.0)},
@@ -125,14 +128,14 @@ func TestDouble(t *testing.T) {
 }
 
 func TestString(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, String, ""},
 		&Elem{2, String, "a"},
 		&Elem{3, String, "abc"}})
 }
 
 func TestBitmap(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, Bitmap, []bool{}},
 		&Elem{2, Bitmap, []bool{false}},
 		&Elem{3, Bitmap, []bool{true}},
@@ -142,7 +145,7 @@ func TestBitmap(t *testing.T) {
 }
 
 func TestListOfString(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, List_of_String, []string{}},
 		&Elem{2, List_of_String, []string{""}},
 		&Elem{3, List_of_String, []string{"", ""}},
@@ -150,7 +153,7 @@ func TestListOfString(t *testing.T) {
 }
 
 func TestListOfUint8(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, List_of_Uint8, []uint8{}},
 		&Elem{2, List_of_Uint8, []uint8{0}},
 		&Elem{3, List_of_Uint8, []uint8{1}},
@@ -160,7 +163,7 @@ func TestListOfUint8(t *testing.T) {
 }
 
 func TestListOfUint16(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, List_of_Uint16, []uint16{}},
 		&Elem{2, List_of_Uint16, []uint16{0}},
 		&Elem{3, List_of_Uint16, []uint16{1}},
@@ -170,7 +173,7 @@ func TestListOfUint16(t *testing.T) {
 }
 
 func TestListOfUint24(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, List_of_Uint24, []uint32{}},
 		&Elem{2, List_of_Uint24, []uint32{0}},
 		&Elem{3, List_of_Uint24, []uint32{1}},
@@ -180,7 +183,7 @@ func TestListOfUint24(t *testing.T) {
 }
 
 func TestListOfUint32(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, List_of_Uint32, []uint32{}},
 		&Elem{2, List_of_Uint32, []uint32{0}},
 		&Elem{3, List_of_Uint32, []uint32{1}},
@@ -190,7 +193,7 @@ func TestListOfUint32(t *testing.T) {
 }
 
 func TestListOfUint64(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, List_of_Uint64, []uint64{}},
 		&Elem{2, List_of_Uint64, []uint64{0}},
 		&Elem{3, List_of_Uint64, []uint64{1}},
@@ -200,7 +203,7 @@ func TestListOfUint64(t *testing.T) {
 }
 
 func TestListOfInt8(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, List_of_Int8, []int8{}},
 		&Elem{2, List_of_Int8, []int8{0}},
 		&Elem{3, List_of_Int8, []int8{1}},
@@ -210,7 +213,7 @@ func TestListOfInt8(t *testing.T) {
 }
 
 func TestListOfInt16(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, List_of_Int16, []int16{}},
 		&Elem{2, List_of_Int16, []int16{0}},
 		&Elem{3, List_of_Int16, []int16{1}},
@@ -220,7 +223,7 @@ func TestListOfInt16(t *testing.T) {
 }
 
 func TestListOfInt24(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, List_of_Int24, []int32{}},
 		&Elem{2, List_of_Int24, []int32{0}},
 		&Elem{3, List_of_Int24, []int32{1}},
@@ -230,7 +233,7 @@ func TestListOfInt24(t *testing.T) {
 }
 
 func TestListOfInt32(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, List_of_Int32, []int32{}},
 		&Elem{2, List_of_Int32, []int32{0}},
 		&Elem{3, List_of_Int32, []int32{1}},
@@ -240,7 +243,7 @@ func TestListOfInt32(t *testing.T) {
 }
 
 func TestListOfInt64(t *testing.T) {
-	encdec(t, Data{
+	encdec(t, List{
 		&Elem{1, List_of_Int64, []int64{}},
 		&Elem{2, List_of_Int64, []int64{0}},
 		&Elem{3, List_of_Int64, []int64{1}},

@@ -3,6 +3,7 @@ package ktlv
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"math"
 )
@@ -532,4 +533,29 @@ func enc_int24(a []byte, n int32) {
 func dec_int24(b []byte) int32 {
 	major := int16(binary.BigEndian.Uint16(b[0:2]))
 	return (int32(major) << 8) + int32(b[2])
+}
+
+// Decode next element from byte slice.
+func scan(bytes []byte) (elem *Elem, tail []byte, err error) {
+	if len(bytes) == 0 {
+		return nil, bytes, errors.New("EOF")
+	}
+	if len(bytes) < 5 {
+		return nil, bytes,
+			errors.New("decode: incomplete element header")
+	}
+	key := binary.BigEndian.Uint16(bytes[0:])
+	ftype := bytes[2]
+	body_len := binary.BigEndian.Uint16(bytes[3:])
+	if len(bytes) < int(body_len)+5 {
+		return nil, nil, fmt.Errorf("decode: broken "+
+			"elem key#%d ftype=%d. expected body"+
+			" len %d but %d found",
+			key, ftype, body_len, len(bytes)-5)
+	}
+	value, err := decodeValue(ftype, bytes[5:5+body_len])
+	if err != nil {
+		return nil, nil, err
+	}
+	return &Elem{key, ftype, value}, bytes[5+body_len:], nil
 }

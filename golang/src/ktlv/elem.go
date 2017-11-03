@@ -1,5 +1,60 @@
 package ktlv
 
+import (
+	"encoding/binary"
+	"fmt"
+	"io"
+)
+
+type Elem struct {
+	Key   uint16
+	FType uint8
+	Value interface{}
+}
+
+// Encode data element to bytes.
+func (e *Elem) Encode() ([]byte, error) {
+	body, err := e.encodeValue()
+	if err != nil {
+		return nil, err
+	}
+	res := make([]byte, len(body)+5)
+	copy(res[5:], body)
+	binary.BigEndian.PutUint16(res[0:2], uint16(e.Key))
+	res[2] = uint8(e.FType)
+	binary.BigEndian.PutUint16(res[3:5], uint16(len(body)))
+	return res, nil
+}
+
+func (e *Elem) WriteTo(writer io.Writer) (n int, err error) {
+	encodedValue, err := e.encodeValue()
+	if err != nil {
+		return 0, err
+	}
+	header := make([]byte, 5)
+	binary.BigEndian.PutUint16(header, uint16(e.Key))
+	header[2] = uint8(e.FType)
+	binary.BigEndian.PutUint16(header[3:], uint16(len(encodedValue)))
+	n1, err := writer.Write(header)
+	if err != nil {
+		return n1, err
+	}
+	n2, err := writer.Write(encodedValue)
+	if err != nil {
+		return n2, err
+	}
+	return n1 + n2, nil
+}
+
+// Encode element value to bytes.
+func (e *Elem) encodeValue() ([]byte, error) {
+	encoded, err := encodeValue(e.FType, e.Value)
+	if err != nil {
+		return nil, fmt.Errorf("encode key#%d: %s", e.Key, err)
+	}
+	return encoded, nil
+}
+
 // Check if elements are equal or not.
 // Used in tests.
 func (e1 *Elem) Equals(e2 *Elem) bool {

@@ -23,12 +23,12 @@ func main() {
 	if int64(n) != fileinfo.Size() {
 		log.Fatalf("only %v bytes read but %v expected", n, fileinfo.Size())
 	}
-	data, err := ktlv.Decode(b)
+	data, err := ktlv.DecodeList(b)
 	if err != nil {
 		log.Fatalf("unable to decode: %s", err)
 	}
 
-	expected := ktlv.Data{
+	expected := ktlv.List{
 		&ktlv.Elem{1, ktlv.Bool, true},
 		&ktlv.Elem{2, ktlv.Uint8, uint8(2)},
 		&ktlv.Elem{3, ktlv.Uint16, uint16(3)},
