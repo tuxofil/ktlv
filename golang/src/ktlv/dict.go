@@ -201,6 +201,16 @@ func (d Dict) GetListOfUint32Def(key uint16, def []uint32) []uint32 {
 	return def
 }
 
+// list of uint64 field getter.
+func (d Dict) GetListOfUint64Def(key uint16, def []uint64) []uint64 {
+	if elem, ok := d[key]; ok {
+		if elem.FType == List_of_Uint64 {
+			return elem.Value.([]uint64)
+		}
+	}
+	return def
+}
+
 // list of string field getter.
 func (d Dict) GetListOfStringDef(key uint16, def []string) []string {
 	if elem, ok := d[key]; ok {
