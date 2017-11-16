@@ -1,3 +1,9 @@
+ktlv (2.1.0) unstable; urgency=low
+
+  * golang: add Dict.GetListOfUint64Def() method
+
+ -- Aleksey Morarash <aleksey.morarash@gmail.com>  Thu, 16 Nov 2017 20:54:38 +0200
+
 ktlv (2.0.0) unstable; urgency=low
 
   * golang: add DecodeElem() API function
