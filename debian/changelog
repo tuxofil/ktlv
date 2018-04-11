@@ -1,3 +1,9 @@
+ktlv (2.2.0) unstable; urgency=low
+
+  * golang: extend API with Search*() functions
+
+ -- Aleksey Morarash <aleksey.morarash@gmail.com>  Wed, 11 Apr 2018 14:04:43 +0300
+
 ktlv (2.1.0) unstable; urgency=low
 
   * golang: add Dict.GetListOfUint64Def() method
