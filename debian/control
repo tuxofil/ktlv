@@ -6,8 +6,6 @@ Build-Depends: debhelper, erlang-dev, erlang-edoc, erlang-eunit,
  python, golang
 Standards-Version: 4.1.4
 Homepage: https://github.com/tuxofil/ktlv
-Vcs-Browser: https://github.com/tuxofil/ktlv
-Vcs-Git: https://github.com/tuxofil/ktlv.git
 
 Package: erlang-ktlv
 Architecture: all
