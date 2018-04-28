@@ -1,3 +1,12 @@
+ktlv (2.2.1) unstable; urgency=low
+
+  * Adapt golang lib path to Debian Stretch rules
+  * Fix copyright year
+  * Specs: remove Vcs-Browser and Vcs-Git links
+  * Upgrade Debian Policy version references
+
+ -- Aleksey Morarash <aleksey.morarash@gmail.com>  Sat, 28 Apr 2018 11:36:43 +0300
+
 ktlv (2.2.0) unstable; urgency=low
 
   * golang: extend API with Search*() functions
