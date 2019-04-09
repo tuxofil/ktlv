@@ -66,7 +66,7 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 		return nil, fmt.Errorf("bad String: %#v (%T)", value, value)
 	case Bitmap:
 		v, ok := value.([]bool)
-		if !ok {
+		if !ok && value != nil {
 			return nil, fmt.Errorf("bad Bitmap: %#v (%T)", value, value)
 		}
 		l := len(v) / 8
@@ -124,7 +124,7 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 		return nil, fmt.Errorf("bad Int64: %#v (%T)", value, value)
 	case List_of_String:
 		v, ok := value.([]string)
-		if !ok {
+		if !ok && value != nil {
 			return nil, fmt.Errorf("bad List_of_String: %#v (%T)", value, value)
 		}
 		tmp := make([][]byte, len(v)*2)
@@ -136,13 +136,13 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 		}
 		return bytes.Join(tmp, []byte{}), nil
 	case List_of_Uint8:
-		if v0, ok := value.([]uint8); ok {
+		if v0, ok := value.([]uint8); ok || value == nil {
 			return v0, nil
 		}
 		return nil, fmt.Errorf("bad List_of_Uint8: %#v (%T)", value, value)
 	case List_of_Uint16:
 		v, ok := value.([]uint16)
-		if !ok {
+		if !ok && value != nil {
 			return nil, fmt.Errorf("bad List_of_Uint16: %#v (%T)", value, value)
 		}
 		res := make([]byte, len(v)*2)
@@ -152,7 +152,7 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 		return res, nil
 	case List_of_Uint24:
 		v, ok := value.([]uint32)
-		if !ok {
+		if !ok && value != nil {
 			return nil, fmt.Errorf("bad List_of_Uint24: %#v (%T)", value, value)
 		}
 		res := make([]byte, len(v)*3)
@@ -162,7 +162,7 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 		return res, nil
 	case List_of_Uint32:
 		v, ok := value.([]uint32)
-		if !ok {
+		if !ok && value != nil {
 			return nil, fmt.Errorf("bad List_of_Uint32: %#v (%T)", value, value)
 		}
 		res := make([]byte, len(v)*4)
@@ -172,7 +172,7 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 		return res, nil
 	case List_of_Uint64:
 		v, ok := value.([]uint64)
-		if !ok {
+		if !ok && value != nil {
 			return nil, fmt.Errorf("bad List_of_Uint64: %#v (%T)", value, value)
 		}
 		res := make([]byte, len(v)*8)
@@ -182,7 +182,7 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 		return res, nil
 	case List_of_Double:
 		v, ok := value.([]float64)
-		if !ok {
+		if !ok && value != nil {
 			return nil, fmt.Errorf("bad List_of_Double: %#v (%T)", value, value)
 		}
 		res := make([]byte, len(v)*8)
@@ -192,7 +192,7 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 		return res, nil
 	case List_of_Int8:
 		v, ok := value.([]int8)
-		if !ok {
+		if !ok && value != nil {
 			return nil, fmt.Errorf("bad List_of_Int8: %#v (%T)", value, value)
 		}
 		res := make([]byte, len(v))
@@ -202,7 +202,7 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 		return res, nil
 	case List_of_Int16:
 		v, ok := value.([]int16)
-		if !ok {
+		if !ok && value != nil {
 			return nil, fmt.Errorf("bad List_of_Int16: %#v (%T)", value, value)
 		}
 		res := make([]byte, len(v)*2)
@@ -212,7 +212,7 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 		return res, nil
 	case List_of_Int24:
 		v, ok := value.([]int32)
-		if !ok {
+		if !ok && value != nil {
 			return nil, fmt.Errorf("bad List_of_Int24: %#v (%T)", value, value)
 		}
 		res := make([]byte, len(v)*3)
@@ -222,7 +222,7 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 		return res, nil
 	case List_of_Int32:
 		v, ok := value.([]int32)
-		if !ok {
+		if !ok && value != nil {
 			return nil, fmt.Errorf("bad List_of_Int32: %#v (%T)", value, value)
 		}
 		res := make([]byte, len(v)*4)
@@ -232,7 +232,7 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 		return res, nil
 	case List_of_Int64:
 		v, ok := value.([]int64)
-		if !ok {
+		if !ok && value != nil {
 			return nil, fmt.Errorf("bad List_of_Int64: %#v (%T)", value, value)
 		}
 		res := make([]byte, len(v)*8)
