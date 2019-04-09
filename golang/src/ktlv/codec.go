@@ -12,91 +12,63 @@ import (
 func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 	switch ftype {
 	case Bool:
-		switch value.(type) {
-		case bool:
-		default:
-			return nil, fmt.Errorf("bad Bool: %#v (%T)",
-				value, value)
-		}
-		if value.(bool) {
-			return []byte{1}, nil
-		} else {
+		if v, ok := value.(bool); ok {
+			if v {
+				return []byte{1}, nil
+			}
 			return []byte{0}, nil
 		}
+		return nil, fmt.Errorf("bad Bool: %#v (%T)", value, value)
 	case Uint8:
-		switch value.(type) {
-		case uint8:
-		default:
-			return nil, fmt.Errorf("bad Uint8: %#v (%T)",
-				value, value)
+		if v, ok := value.(uint8); ok {
+			return []byte{v}, nil
 		}
-		return []byte{value.(uint8)}, nil
+		return nil, fmt.Errorf("bad Uint8: %#v (%T)", value, value)
 	case Uint16:
-		switch value.(type) {
-		case uint16:
-		default:
-			return nil, fmt.Errorf("bad Uint16: %#v (%T)",
-				value, value)
+		if v, ok := value.(uint16); ok {
+			res := make([]byte, 2)
+			binary.BigEndian.PutUint16(res, v)
+			return res, nil
 		}
-		res := make([]byte, 2)
-		binary.BigEndian.PutUint16(res, value.(uint16))
-		return res, nil
+		return nil, fmt.Errorf("bad Uint16: %#v (%T)", value, value)
 	case Uint24:
-		switch value.(type) {
-		case uint32:
-		default:
-			return nil, fmt.Errorf("bad Uint24: %#v (%T)",
-				value, value)
+		if v, ok := value.(uint32); ok {
+			res := make([]byte, 3)
+			enc_uint24(res, v)
+			return res, nil
 		}
-		res := make([]byte, 3)
-		enc_uint24(res, value.(uint32))
-		return res, nil
+		return nil, fmt.Errorf("bad Uint24: %#v (%T)", value, value)
 	case Uint32:
-		switch value.(type) {
-		case uint32:
-		default:
-			return nil, fmt.Errorf("bad Uint32: %#v (%T)",
-				value, value)
+		if v, ok := value.(uint32); ok {
+			res := make([]byte, 4)
+			binary.BigEndian.PutUint32(res, v)
+			return res, nil
 		}
-		res := make([]byte, 4)
-		binary.BigEndian.PutUint32(res, value.(uint32))
-		return res, nil
+		return nil, fmt.Errorf("bad Uint32: %#v (%T)", value, value)
 	case Uint64:
-		switch value.(type) {
-		case uint64:
-		default:
-			return nil, fmt.Errorf("bad Uint64: %#v (%T)",
-				value, value)
+		if v, ok := value.(uint64); ok {
+			res := make([]byte, 8)
+			binary.BigEndian.PutUint64(res, v)
+			return res, nil
 		}
-		res := make([]byte, 8)
-		binary.BigEndian.PutUint64(res, value.(uint64))
-		return res, nil
+		return nil, fmt.Errorf("bad Uint64: %#v (%T)", value, value)
 	case Double:
-		switch value.(type) {
-		case float64:
-		default:
-			return nil, fmt.Errorf("bad Double: %#v (%T)",
-				value, value)
+		if v, ok := value.(float64); ok {
+			res := make([]byte, 8)
+			binary.BigEndian.PutUint64(res, math.Float64bits(v))
+			return res, nil
 		}
-		res := make([]byte, 8)
-		binary.BigEndian.PutUint64(res, math.Float64bits(value.(float64)))
-		return res, nil
+		return nil, fmt.Errorf("bad Double: %#v (%T)", value, value)
 	case String:
-		switch value.(type) {
-		case string:
-		default:
-			return nil, fmt.Errorf("bad String: %#v (%T)",
-				value, value)
+		if v, ok := value.(string); ok {
+			return []byte(v), nil
 		}
-		return []byte(value.(string)), nil
+		return nil, fmt.Errorf("bad String: %#v (%T)", value, value)
 	case Bitmap:
-		switch value.(type) {
-		case []bool:
-		default:
-			return nil, fmt.Errorf("bad Bitmap: %#v (%T)",
-				value, value)
+		v, ok := value.([]bool)
+		if !ok {
+			return nil, fmt.Errorf("bad Bitmap: %#v (%T)", value, value)
 		}
-		v := value.([]bool)
 		l := len(v) / 8
 		rem := len(v) % 8
 		var unused uint8
@@ -118,61 +90,43 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 		}
 		return res, nil
 	case Int8:
-		switch value.(type) {
-		case int8:
-		default:
-			return nil, fmt.Errorf("bad Int8: %#v (%T)",
-				value, value)
+		if v, ok := value.(int8); ok {
+			return []byte{uint8(v)}, nil
 		}
-		return []byte{uint8(value.(int8))}, nil
+		return nil, fmt.Errorf("bad Int8: %#v (%T)", value, value)
 	case Int16:
-		switch value.(type) {
-		case int16:
-		default:
-			return nil, fmt.Errorf("bad Int16: %#v (%T)",
-				value, value)
+		if v, ok := value.(int16); ok {
+			res := make([]byte, 2)
+			binary.BigEndian.PutUint16(res, uint16(v))
+			return res, nil
 		}
-		res := make([]byte, 2)
-		binary.BigEndian.PutUint16(res, uint16(value.(int16)))
-		return res, nil
+		return nil, fmt.Errorf("bad Int16: %#v (%T)", value, value)
 	case Int24:
-		switch value.(type) {
-		case int32:
-		default:
-			return nil, fmt.Errorf("bad Int24: %#v (%T)",
-				value, value)
+		if v, ok := value.(int32); ok {
+			res := make([]byte, 3)
+			enc_int24(res, v)
+			return res, nil
 		}
-		res := make([]byte, 3)
-		enc_int24(res, value.(int32))
-		return res, nil
+		return nil, fmt.Errorf("bad Int24: %#v (%T)", value, value)
 	case Int32:
-		switch value.(type) {
-		case int32:
-		default:
-			return nil, fmt.Errorf("bad Int32: %#v (%T)",
-				value, value)
+		if v, ok := value.(int32); ok {
+			res := make([]byte, 4)
+			binary.BigEndian.PutUint32(res, uint32(v))
+			return res, nil
 		}
-		res := make([]byte, 4)
-		binary.BigEndian.PutUint32(res, uint32(value.(int32)))
-		return res, nil
+		return nil, fmt.Errorf("bad Int32: %#v (%T)", value, value)
 	case Int64:
-		switch value.(type) {
-		case int64:
-		default:
-			return nil, fmt.Errorf("bad Int64: %#v (%T)",
-				value, value)
+		if v, ok := value.(int64); ok {
+			res := make([]byte, 8)
+			binary.BigEndian.PutUint64(res, uint64(v))
+			return res, nil
 		}
-		res := make([]byte, 8)
-		binary.BigEndian.PutUint64(res, uint64(value.(int64)))
-		return res, nil
+		return nil, fmt.Errorf("bad Int64: %#v (%T)", value, value)
 	case List_of_String:
-		switch value.(type) {
-		case []string:
-		default:
-			return nil, fmt.Errorf("bad List_of_String: %#v (%T)",
-				value, value)
+		v, ok := value.([]string)
+		if !ok {
+			return nil, fmt.Errorf("bad List_of_String: %#v (%T)", value, value)
 		}
-		v := value.([]string)
 		tmp := make([][]byte, len(v)*2)
 		for i, s := range v {
 			tmp[i*2] = make([]byte, 2)
@@ -182,138 +136,105 @@ func encodeValue(ftype uint8, value interface{}) ([]byte, error) {
 		}
 		return bytes.Join(tmp, []byte{}), nil
 	case List_of_Uint8:
-		switch value.(type) {
-		case []uint8:
-		default:
-			return nil, fmt.Errorf("bad List_of_Uint8: %#v (%T)",
-				value, value)
+		if v0, ok := value.([]uint8); ok {
+			return v0, nil
 		}
-		return []byte(value.([]uint8)), nil
+		return nil, fmt.Errorf("bad List_of_Uint8: %#v (%T)", value, value)
 	case List_of_Uint16:
-		switch value.(type) {
-		case []uint16:
-		default:
-			return nil, fmt.Errorf("bad List_of_Uint16: %#v (%T)",
-				value, value)
+		v, ok := value.([]uint16)
+		if !ok {
+			return nil, fmt.Errorf("bad List_of_Uint16: %#v (%T)", value, value)
 		}
-		v := value.([]uint16)
 		res := make([]byte, len(v)*2)
 		for i, n := range v {
 			binary.BigEndian.PutUint16(res[i*2:(i+1)*2], n)
 		}
 		return res, nil
 	case List_of_Uint24:
-		switch value.(type) {
-		case []uint32:
-		default:
-			return nil, fmt.Errorf("bad List_of_Uint24: %#v (%T)",
-				value, value)
+		v, ok := value.([]uint32)
+		if !ok {
+			return nil, fmt.Errorf("bad List_of_Uint24: %#v (%T)", value, value)
 		}
-		v := value.([]uint32)
 		res := make([]byte, len(v)*3)
 		for i, n := range v {
 			enc_uint24(res[i*3:(i+1)*3], n)
 		}
 		return res, nil
 	case List_of_Uint32:
-		switch value.(type) {
-		case []uint32:
-		default:
-			return nil, fmt.Errorf("bad List_of_Uint32: %#v (%T)",
-				value, value)
+		v, ok := value.([]uint32)
+		if !ok {
+			return nil, fmt.Errorf("bad List_of_Uint32: %#v (%T)", value, value)
 		}
-		v := value.([]uint32)
 		res := make([]byte, len(v)*4)
 		for i, n := range v {
 			binary.BigEndian.PutUint32(res[i*4:(i+1)*4], n)
 		}
 		return res, nil
 	case List_of_Uint64:
-		switch value.(type) {
-		case []uint64:
-		default:
-			return nil, fmt.Errorf("bad List_of_Uint64: %#v (%T)",
-				value, value)
+		v, ok := value.([]uint64)
+		if !ok {
+			return nil, fmt.Errorf("bad List_of_Uint64: %#v (%T)", value, value)
 		}
-		v := value.([]uint64)
 		res := make([]byte, len(v)*8)
 		for i, n := range v {
 			binary.BigEndian.PutUint64(res[i*8:(i+1)*8], n)
 		}
 		return res, nil
 	case List_of_Double:
-		switch value.(type) {
-		case []float64:
-		default:
-			return nil, fmt.Errorf("bad List_of_Double: %#v (%T)",
-				value, value)
+		v, ok := value.([]float64)
+		if !ok {
+			return nil, fmt.Errorf("bad List_of_Double: %#v (%T)", value, value)
 		}
-		v := value.([]float64)
 		res := make([]byte, len(v)*8)
 		for i, n := range v {
 			binary.BigEndian.PutUint64(res[i*8:(i+1)*8], math.Float64bits(n))
 		}
 		return res, nil
 	case List_of_Int8:
-		switch value.(type) {
-		case []int8:
-		default:
-			return nil, fmt.Errorf("bad List_of_Int8: %#v (%T)",
-				value, value)
+		v, ok := value.([]int8)
+		if !ok {
+			return nil, fmt.Errorf("bad List_of_Int8: %#v (%T)", value, value)
 		}
-		v := value.([]int8)
 		res := make([]byte, len(v))
 		for i, n := range v {
 			res[i] = uint8(n)
 		}
 		return res, nil
 	case List_of_Int16:
-		switch value.(type) {
-		case []int16:
-		default:
-			return nil, fmt.Errorf("bad List_of_Int16: %#v (%T)",
-				value, value)
+		v, ok := value.([]int16)
+		if !ok {
+			return nil, fmt.Errorf("bad List_of_Int16: %#v (%T)", value, value)
 		}
-		v := value.([]int16)
 		res := make([]byte, len(v)*2)
 		for i, n := range v {
 			binary.BigEndian.PutUint16(res[i*2:(i+1)*2], uint16(n))
 		}
 		return res, nil
 	case List_of_Int24:
-		switch value.(type) {
-		case []int32:
-		default:
-			return nil, fmt.Errorf("bad List_of_Int24: %#v (%T)",
-				value, value)
+		v, ok := value.([]int32)
+		if !ok {
+			return nil, fmt.Errorf("bad List_of_Int24: %#v (%T)", value, value)
 		}
-		v := value.([]int32)
 		res := make([]byte, len(v)*3)
 		for i, n := range v {
 			enc_int24(res[i*3:(i+1)*3], n)
 		}
 		return res, nil
 	case List_of_Int32:
-		switch value.(type) {
-		case []int32:
-		default:
-			return nil, fmt.Errorf("bad List_of_Int32: %#v (%T)",
-				value, value)
+		v, ok := value.([]int32)
+		if !ok {
+			return nil, fmt.Errorf("bad List_of_Int32: %#v (%T)", value, value)
 		}
-		v := value.([]int32)
 		res := make([]byte, len(v)*4)
 		for i, n := range v {
 			binary.BigEndian.PutUint32(res[i*4:(i+1)*4], uint32(n))
 		}
 		return res, nil
 	case List_of_Int64:
-		switch value.(type) {
-		case []int64:
-		default:
-			return nil, fmt.Errorf("bad List_of_Int64: %#v (%T)",
-				value, value)
+		v, ok := value.([]int64)
+		if !ok {
+			return nil, fmt.Errorf("bad List_of_Int64: %#v (%T)", value, value)
 		}
-		v := value.([]int64)
 		res := make([]byte, len(v)*8)
 		for i, n := range v {
 			binary.BigEndian.PutUint64(res[i*8:(i+1)*8], uint64(n))
