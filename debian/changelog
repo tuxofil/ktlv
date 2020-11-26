@@ -1,3 +1,10 @@
+ktlv (2.2.3) unstable; urgency=low
+
+  * Add missing HOME dir for go compiler
+  * Make Golang package go mod compatible
+
+ -- Aleksey Morarash <aleksey.morarash@gmail.com>  Thu, 26 Nov 2020 16:55:33 +0200
+
 ktlv (2.2.2) unstable; urgency=low
 
   * Allow nil values for lists
