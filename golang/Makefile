@@ -1,11 +1,16 @@
-.PHONY: all test fmt clean
+.PHONY: all test cover clean
+
+ifndef ($(HOME))
+   export HOME = /tmp
+endif
 
 all:
 
 test:
-	GOPATH=`pwd` go test -v ktlv
+	cd src/ktlv && go test -v -race -coverprofile=.cover.out ./...
 
-fmt:
-	find . -type f -name \*.go -exec gofmt -w '{}' ';'
+cover: test
+	cd src/ktlv && go tool cover -html=.cover.out
 
 clean:
+	rm -f src/ktlv/.cover.out
